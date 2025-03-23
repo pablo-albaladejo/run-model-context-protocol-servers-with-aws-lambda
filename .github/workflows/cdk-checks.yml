@@ -30,6 +30,8 @@ jobs:
       - name: Synthesize CDK stack
         run: cdk synth --app 'python3 cdk_stack.py'
         working-directory: ./examples/servers/time
+        env:
+          CDK_DEFAULT_ACCOUNT: "000000000000"
 
   check_weather_alerts_server:
     name: Check Typescript-based Weather Alerts Server
@@ -60,3 +62,5 @@ jobs:
       - name: Synthesize CDK stack
         run: cdk synth --app 'node lib/weather-alerts-mcp-server.js'
         working-directory: ./examples/servers/weather-alerts
+        env:
+          CDK_DEFAULT_ACCOUNT: "000000000000"
