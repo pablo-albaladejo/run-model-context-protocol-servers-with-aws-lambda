@@ -1,4 +1,4 @@
-# Model Context Protocol with AWS Lambda
+# Utilities for Model Context Protocol (MCP) with AWS Lambda
 
 This project enables you to run [Model Context Protocol](https://modelcontextprotocol.io) servers in AWS Lambda functions.
 
@@ -225,3 +225,11 @@ To use the remote 'time' server, you can ask the chatbot questions like "What is
 To use the remote 'weather-alerts' server, you can ask the chatbot questions like "Are there any weather alerts right now?".
 
 To use the local 'fetch' server, you can ask questions like "Who is Tom Cruise?".
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This project is licensed under the Apache-2.0 License.
