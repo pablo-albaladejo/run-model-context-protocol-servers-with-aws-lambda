@@ -10,7 +10,7 @@ export class WeatherAlertsMcpServer extends cdk.Stack {
 
     // Package local module as a layer for testing
     const mcpLambdaLayer = new LayerVersion(this, 'McpLambdaLayer', {
-      code: Code.fromAsset(path.join(__dirname, '../../../../typescript'), {
+      code: Code.fromAsset(path.join(__dirname, '../../../../src/typescript'), {
         bundling: {
           image: Runtime.NODEJS_22_X.bundlingImage,
           command: [
