@@ -4,7 +4,8 @@ on:
   workflow_call:
 
 jobs:
-  format:
+  check_python:
+    name: Check Python library
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,53 +22,18 @@ jobs:
 
       - name: Install the project
         run: uv sync --frozen --all-extras --dev
+        working-directory: ./src/python
+
+      - name: Build
+        run: uv build
         working-directory: ./src/python
 
       - name: Run ruff format check
         run: uv run --frozen ruff check .
         working-directory: ./src/python
 
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: "src/python/.python-version"
-
-      - name: Install the project
-        run: uv sync --frozen --all-extras --dev
-        working-directory: ./src/python
-
       - name: Run pyright
         run: uv run --frozen pyright
-        working-directory: ./src/python
-
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          enable-cache: true
-
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: "src/python/.python-version"
-
-      - name: Install the project
-        run: uv sync --frozen --all-extras --dev
         working-directory: ./src/python
 
       - name: Run pytest
