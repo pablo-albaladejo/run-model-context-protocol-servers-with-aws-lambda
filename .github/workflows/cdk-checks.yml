@@ -1,0 +1,56 @@
+name: Example Servers Checks
+
+on:
+  workflow_call:
+
+jobs:
+  check_time_server:
+    name: Check Python-based Time Server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Set up Typescript"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "src/python/.python-version"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        working-directory: ./examples/servers/time
+
+      - name: Synthesize CDK stack
+        run: cdk synth --app 'python3 cdk_stack.py'
+        working-directory: ./examples/servers/time
+
+  check_weather_alerts_server:
+    name: Check Typescript-based Weather Alerts Server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Set up Typescript"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build and link mcp-lambda package
+        run: npm ci && npm run build && npm link
+        working-directory: ./src/typescript
+
+      - name: Install dependencies
+        run: npm ci && npm link mcp-lambda
+        working-directory: ./examples/servers/weather-alerts
+
+      - name: Build
+        run: npm run build
+        working-directory: ./examples/servers/weather-alerts
+
+      - name: Synthesize CDK stack
+        run: cdk synth --app 'node lib/weather-alerts-mcp-server.js'
+        working-directory: ./examples/servers/weather-alerts

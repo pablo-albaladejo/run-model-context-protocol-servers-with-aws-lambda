@@ -13,3 +13,5 @@ jobs:
     uses: ./.github/workflows/python-checks.yml
   typescript:
     uses: ./.github/workflows/typescript-checks.yml
+  cdk:
+    uses: ./.github/workflows/cdk-checks.yml
