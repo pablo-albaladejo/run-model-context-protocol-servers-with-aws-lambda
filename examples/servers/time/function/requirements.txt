@@ -1,0 +1,4 @@
+mcp-server-time
+
+# For testing, this module is installed from local files
+# mcp-lambda

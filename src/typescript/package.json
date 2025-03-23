@@ -1,0 +1,26 @@
+{
+  "name": "mcp-lambda",
+  "description": "Model Context Protocol SDK for AWS Lambda",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.750.0",
+    "@modelcontextprotocol/sdk": "^1.5.0",
+    "@types/aws-lambda": "^8.10.147",
+    "winston": "^3.17.0"
+  }
+}

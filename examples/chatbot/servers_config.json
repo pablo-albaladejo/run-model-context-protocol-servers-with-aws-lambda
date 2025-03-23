@@ -1,0 +1,18 @@
+{
+  "stdioServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    }
+  },
+  "lambdaFunctionServers": {
+    "time": {
+      "functionName": "mcp-server-time",
+      "region": "us-east-2"
+    },
+    "weatherAlerts": {
+      "functionName": "mcp-server-weather-alerts",
+      "region": "us-east-2"
+    }
+  }
+}

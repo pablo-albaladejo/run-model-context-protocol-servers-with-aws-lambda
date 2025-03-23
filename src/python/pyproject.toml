@@ -1,0 +1,62 @@
+[project]
+name = "mcp-lambda"
+dynamic = ["version"]
+description = "Model Context Protocol SDK for AWS Lambda"
+requires-python = ">=3.11"
+
+dependencies = [
+    "anyio>=4.5",
+    "aiobotocore>=2.20.0",
+    "mcp>=1.4.1"
+]
+
+[project.optional-dependencies]
+stubs = ["types-aiobotocore[lambda]>=2.20.0"]
+
+[tool.uv]
+resolution = "lowest-direct"
+dev-dependencies = [
+    "pyright>=1.1.391",
+    "pytest>=8.3.4",
+    "ruff>=0.8.5",
+    "trio>=0.26.2",
+    "pytest-cov>=6.0.0",
+    "pytest-env>=1.1.5"
+]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+bump = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_lambda"]
+
+[tool.pyright]
+include = ["src/mcp_lambda", "tests"]
+venvPath = "."
+venv = ".venv"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+log_format = "%(asctime)s - %(levelname)s - %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli_level = "DEBUG"
+log_cli = true
+
+[tool.pytest_env]
+LOG_LEVEL = "DEBUG"

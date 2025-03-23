@@ -1,0 +1,128 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "weather.gov API",
+    "description": "weather.gov API - This is a very small subset of the overall weather.gov API, focusing on counts of national weather alerts",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.weather.gov",
+      "description": "Production server"
+    }
+  ],
+  "security": [
+    {
+      "userAgent": []
+    }
+  ],
+  "externalDocs": {
+    "description": "Full API documentation",
+    "url": "https://www.weather.gov/documentation/services-web-api"
+  },
+  "paths": {
+    "/alerts/active/count": {
+      "get": {
+        "description": "Returns info on the number of active weather alerts",
+        "operationId": "alerts_active_count",
+        "responses": {
+          "200": {
+            "description": "A data structure showing the counts of active weather alerts broken down by various categories",
+            "headers": {
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/CorrelationId"
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              },
+              "X-Server-Id": {
+                "$ref": "#/components/headers/ServerId"
+              }
+            },
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "minimum": 0,
+                      "type": "integer",
+                      "description": "The total number of active alerts"
+                    },
+                    "land": {
+                      "minimum": 0,
+                      "type": "integer",
+                      "description": "The total number of active alerts affecting land zones"
+                    },
+                    "marine": {
+                      "minimum": 0,
+                      "type": "integer",
+                      "description": "The total number of active alerts affecting marine zones"
+                    },
+                    "regions": {
+                      "type": "object",
+                      "description": "Active alerts by marine region",
+                      "additionalProperties": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "areas": {
+                      "type": "object",
+                      "description": "Active alerts by area (state/territory)",
+                      "additionalProperties": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    },
+                    "zones": {
+                      "type": "object",
+                      "description": "Active alerts by NWS public zone or county code",
+                      "additionalProperties": {
+                        "minimum": 1,
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "responses": {},
+    "headers": {
+      "CorrelationId": {
+        "description": "A unique identifier for the request, used for NWS debugging purposes. Please include this identifier with any correspondence to help us investigate your issue.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "RequestId": {
+        "description": "A unique identifier for the request, used for NWS debugging purposes. Please include this identifier with any correspondence to help us investigate your issue.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ServerId": {
+        "description": "The identifier of the server that generated the response, used for NWS debugging purposes. Please include this identifier with any correspondence to help us investigate your issue.\n",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "securitySchemes": {
+      "userAgent": {
+        "type": "apiKey",
+        "description": "We require that all consumers of the API include a User-Agent header in requests. This is due to a high number of scripts exhibiting abusive behavior (intentional or unintentional). We recommend setting the value to something that identifies your application and includes a contact email. This will help us contact you if we notice unusual behavior and also aid in troubleshooting issues.\nThe API remains open and free to use and there are no limits imposed based on the User-Agent string.\nThis mechanism will be replaced with a more typical API key system at a later date.\n",
+        "name": "User-Agent",
+        "in": "header"
+      }
+    }
+  }
+}
