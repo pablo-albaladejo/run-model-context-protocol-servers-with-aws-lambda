@@ -3,10 +3,12 @@
   "description": "Model Context Protocol SDK for AWS Lambda",
   "version": "0.0.1",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint src/",
+    "test": "jest"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,8 +16,15 @@
     "dist"
   ],
   "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/jest": "^29.5.12",
     "@types/node": "^22.13.5",
-    "typescript": "^5.7.3"
+    "eslint": "^9.8.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.750.0",
