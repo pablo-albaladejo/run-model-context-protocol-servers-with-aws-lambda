@@ -55,9 +55,9 @@ async function handleMessage(
 }
 
 async function handleNotification(
-  serverParams: StdioServerParameters,
-  event: JSONRPCNotification,
-  context: Context
+  _serverParams: StdioServerParameters,
+  _event: JSONRPCNotification,
+  _context: Context
 ) {
   // Ignore notifications
   logger.debug('Ignoring notification');
@@ -67,7 +67,7 @@ async function handleNotification(
 async function handleRequest(
   serverParams: StdioServerParameters,
   event: JSONRPCRequest,
-  context: Context
+  _context: Context
 ): Promise<JSONRPCMessage> {
   logger.debug('Handling request');
   const transport = new StdioClientTransport(serverParams);
