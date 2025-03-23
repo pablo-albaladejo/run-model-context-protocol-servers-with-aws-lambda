@@ -30,3 +30,21 @@ updates:
     interval: monthly
   open-pull-requests-limit: 10
   versioning-strategy: increase
+- package-ecosystem: npm
+  directory: "/src/typescript"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+- package-ecosystem: npm
+  directory: "/e2e_tests/typescript"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+- package-ecosystem: npm
+  directory: "/examples/servers/weather-alerts"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
