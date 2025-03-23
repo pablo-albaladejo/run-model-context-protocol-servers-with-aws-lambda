@@ -3,7 +3,6 @@
 cdk.out
 cdk.context.json
 *.swp
-package-lock.json
 
 # Node
 *.js
