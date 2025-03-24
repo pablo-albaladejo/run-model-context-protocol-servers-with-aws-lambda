@@ -3,5 +3,5 @@
     "compilerOptions": {
       "outDir": "./dist/esm"
     },
-    "exclude": ["**/*.test.ts", "tests/**/*"]
+    "exclude": ["**/*.test.ts", "test-stdio-server/**/*"]
   }

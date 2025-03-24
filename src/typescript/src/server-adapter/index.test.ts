@@ -5,9 +5,8 @@ import {
 } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 const serverParameters: StdioServerParameters = {
-  command: 'node',
-  args: ['../../dist/tests/minimal_mcp_server/echo_server.js'],
-  cwd: __dirname,
+  command: 'npx',
+  args: ['tsx', 'test-stdio-server/echo_server.ts'],
 };
 
 test('should start then close cleanly', async () => {

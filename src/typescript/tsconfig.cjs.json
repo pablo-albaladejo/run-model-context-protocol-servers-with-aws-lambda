@@ -5,5 +5,5 @@
       "moduleResolution": "node",
       "outDir": "./dist/cjs"
     },
-    "exclude": ["**/*.test.ts", "tests/**/*"]
+    "exclude": ["**/*.test.ts", "test-stdio-server/**/*"]
 }
