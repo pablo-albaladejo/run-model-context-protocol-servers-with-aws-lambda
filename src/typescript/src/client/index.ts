@@ -28,21 +28,13 @@ export class LambdaFunctionClientTransport implements Transport {
 
   constructor(server: LambdaFunctionParameters) {
     this._serverParams = server;
-  }
-
-  /**
-   * Creates the Lambda client.
-   */
-  async start(): Promise<void> {
-    if (this._lambdaClient) {
-      throw new Error(
-        'LambdaFunctionClientTransport already started! If using Client class, note that connect() calls start() automatically.'
-      );
-    }
-
     this._lambdaClient = new LambdaClient({
       region: this._serverParams.regionName,
     });
+  }
+
+  async start(): Promise<void> {
+    // no-op
   }
 
   async close(): Promise<void> {
