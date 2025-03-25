@@ -1,6 +1,5 @@
 import {
   JSONRPCError,
-  JSONRPCMessage,
   JSONRPCNotification,
   JSONRPCRequest,
   JSONRPCResponse,
