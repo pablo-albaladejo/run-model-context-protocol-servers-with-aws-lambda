@@ -14,6 +14,7 @@ import {
   JSONRPCResponse,
   McpError,
   ResultSchema,
+  ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { createLogger, format, transports } from 'winston';
@@ -46,8 +47,24 @@ async function handleMessage(
     return await handleRequest(serverParams, request, context);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const notification = JSONRPCNotificationSchema.parse(event);
-      return await handleNotification(serverParams, notification, context);
+      try {
+        const notification = JSONRPCNotificationSchema.parse(event);
+        return await handleNotification(serverParams, notification, context);
+      } catch (notificationError) {
+        if (notificationError instanceof z.ZodError) {
+          return {
+            jsonrpc: event.jsonrpc,
+            id: 0,
+            error: {
+              code: ErrorCode.InvalidRequest,
+              message:
+                'Request is neither a valid JSON-RPC request nor a valid JSON-RPC notification',
+            },
+          } as JSONRPCError;
+        } else {
+          throw notificationError;
+        }
+      }
     } else {
       throw error;
     }
@@ -70,7 +87,7 @@ async function handleRequest(
   _context: Context
 ): Promise<JSONRPCMessage> {
   logger.debug('Handling request');
-  const transport = new StdioClientTransport(serverParams);
+  const { jsonrpc, id, ...request } = event;
 
   const client = new Client(
     {
@@ -86,11 +103,11 @@ async function handleRequest(
     }
   );
 
-  await client.connect(transport);
-
-  const { jsonrpc, id, ...request } = event;
-
   try {
+    const transport = new StdioClientTransport(serverParams);
+
+    await client.connect(transport);
+
     const result = await client.request(request, ResultSchema);
 
     return {
@@ -104,7 +121,10 @@ async function handleRequest(
       return {
         jsonrpc: jsonrpc,
         id: id,
-        error: error,
+        error: {
+          code: error.code,
+          message: error.message,
+        },
       } as JSONRPCError;
     } else {
       logger.error(`General exception: ${error}`);
@@ -113,7 +133,7 @@ async function handleRequest(
         id: id,
         error: {
           code: 500,
-          message: String(error),
+          message: 'Internal failure, please check Lambda function logs',
         },
       } as JSONRPCError;
     }
