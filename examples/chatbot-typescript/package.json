@@ -1,28 +1,26 @@
 {
   "name": "mcp-chatbot-typescript",
   "version": "1.0.0",
-  "description": "TypeScript chatbot using Model Context Protocol with AWS Lambda",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
+    "start": "ts-node src/main.ts",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.529.1",
-    "@modelcontextprotocol/sdk": "^0.1.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.750.0",
+    "@modelcontextprotocol/sdk": "^1.5.0",
     "mcp-lambda": "file:../../src/typescript",
     "readline-sync": "^1.4.10",
-    "winston": "^3.11.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
+    "@eslint/js": "^9.8.0",
+    "@types/node": "^22.13.5",
     "@types/readline-sync": "^1.4.8",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
-    "eslint": "^8.56.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "eslint": "^9.8.0",
+    "tsx": "^4.16.5",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.0.0"
   }
 }
