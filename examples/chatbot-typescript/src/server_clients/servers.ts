@@ -1,6 +1,7 @@
-import { Server } from './server.js';
-import { Tool } from './tool.js';
-import logger from '../logger.js';
+import { Server } from "./server.js";
+import { Tool } from "./tool.js";
+import logger from "../logger.js";
+import { ContentBlock } from "@aws-sdk/client-bedrock-runtime";
 
 /**
  * Class for managing multiple MCP servers.
@@ -16,7 +17,7 @@ export class Servers {
    * Initialize all servers
    */
   async initialize(): Promise<void> {
-    logger.info('Starting servers');
+    logger.info("Starting servers");
     for (const server of this.servers) {
       logger.info(`Starting server: ${server.name}`);
       await server.initialize();
@@ -27,7 +28,7 @@ export class Servers {
    * Close all servers
    */
   async close(): Promise<void> {
-    logger.info('Stopping servers');
+    logger.info("Stopping servers");
     for (const server of [...this.servers].reverse()) {
       logger.info(`Stopping server: ${server.name}`);
       await server.close();
@@ -52,7 +53,7 @@ export class Servers {
   async findServerWithTool(toolName: string): Promise<Server> {
     for (const server of this.servers) {
       const tools = await server.listTools();
-      if (tools.some(tool => tool.name === toolName)) {
+      if (tools.some((tool) => tool.name === toolName)) {
         return server;
       }
     }
@@ -66,23 +67,11 @@ export class Servers {
     toolName: string,
     toolUseId: string,
     arguments_: Record<string, any>
-  ): Promise<Record<string, any>> {
+  ): Promise<ContentBlock> {
     try {
       const server = await this.findServerWithTool(toolName);
 
-      const result = await server.executeTool(
-        toolName,
-        toolUseId,
-        arguments_
-      );
-
-      if (result && typeof result === 'object' && 'progress' in result) {
-        const progress = result.progress;
-        const total = result.total;
-        const percentage = (progress / total) * 100;
-        logger.info(`Progress: ${progress}/${total} (${percentage.toFixed(1)}%)`);
-        throw new Error('Does not support progress notifications from tools yet');
-      }
+      const result = await server.executeTool(toolName, toolUseId, arguments_);
 
       return { toolResult: result };
     } catch (e) {
@@ -90,8 +79,8 @@ export class Servers {
         toolResult: {
           toolUseId,
           content: [{ text: `No server found with tool: ${toolName}` }],
-          status: 'error',
-        }
+          status: "error",
+        },
       };
     }
   }

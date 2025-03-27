@@ -1,4 +1,10 @@
-import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+  ConverseCommandOutput,
+  Message,
+  Tool,
+} from "@aws-sdk/client-bedrock-runtime";
 
 /**
  * Manages communication with Bedrock.
@@ -14,16 +20,16 @@ export class LLMClient {
 
   /**
    * Get a response from the LLM, using the Bedrock Converse API.
-   * @param messages A list of message dictionaries.
+   * @param messages A list of message for the model.
    * @param systemPrompt The system prompt to use.
    * @param tools The list of tools to make available to the model.
    * @returns The LLM's full response.
    */
   async getResponse(
-    messages: Record<string, any>[],
+    messages: Message[],
     systemPrompt: string,
-    tools: Record<string, any>[]
-  ): Promise<Record<string, any>> {
+    tools: Tool[]
+  ): Promise<ConverseCommandOutput> {
     const command = new ConverseCommand({
       modelId: this.modelId,
       messages,
@@ -36,7 +42,6 @@ export class LLMClient {
       toolConfig: { tools },
     });
 
-    const response = await this.bedrockClient.send(command);
-    return response as Record<string, any>;
+    return await this.bedrockClient.send(command);
   }
 }

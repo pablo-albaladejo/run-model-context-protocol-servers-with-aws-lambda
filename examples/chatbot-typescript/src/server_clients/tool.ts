@@ -1,3 +1,5 @@
+import { Tool as BedrockTool } from "@aws-sdk/client-bedrock-runtime";
+
 /**
  * Represents a tool with its properties and formatting.
  */
@@ -6,7 +8,11 @@ export class Tool {
   description: string;
   inputSchema: Record<string, any>;
 
-  constructor(name: string, description: string, inputSchema: Record<string, any>) {
+  constructor(
+    name: string,
+    description: string,
+    inputSchema: Record<string, any>
+  ) {
     this.name = name;
     this.description = description;
     this.inputSchema = inputSchema;
@@ -16,7 +22,7 @@ export class Tool {
    * Format tool information for the Bedrock Converse API.
    * @returns A tool specification dictionary.
    */
-  formatForLLM(): Record<string, any> {
+  formatForLLM(): BedrockTool {
     return {
       toolSpec: {
         name: this.name,

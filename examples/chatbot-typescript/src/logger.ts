@@ -22,9 +22,4 @@ const logger = winston.createLogger({
   ],
 });
 
-// Silence AWS SDK logs unless explicitly enabled
-if (process.env.LOG_LEVEL !== 'debug') {
-  logger.silent = false;
-}
-
 export default logger;
