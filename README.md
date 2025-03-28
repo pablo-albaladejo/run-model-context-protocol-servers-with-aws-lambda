@@ -37,29 +37,29 @@ flowchart LR
 
 ## Considerations
 
-* This package currently supports MCP servers and clients written in Python and Typescript.
-Other languages such as Kotlin are not supported.
-* The server adapters only adapt stdio MCP servers, not servers written for other protocols such as SSE.
-* The server adapters does not maintain any MCP server state across Lambda function invocations.
-Only stateless MCP servers are a good fit for using this adapter. For example, MCP servers
-that invoke stateless tools like the [time MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/time)
-or make stateless web requests like the [fetch MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch).
-Stateful MCP servers are not a good fit, because they will lose their state on every request.
-For example, MCP servers that manage data on disk or in memory such as
-the [sqlite MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite),
-the [filesystem MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem),
-and the [git MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/git).
-* The server adapters ignore any MCP protocol notifications from the client to the server.
-* The server adapters do not provide mechanisms for managing any secrets needed by the wrapped
-MCP server. For example, the [GitHub MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/github)
-and the [Brave search MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)
-require API keys to make requests to third-party APIs.
-You can configure these API keys as
-[encrypted environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html)
-in the Lambda function's configuration. However, note that anyone with access to invoke the Lambda function
-will then have access to use your API key to call the third-party APIs by invoking the function.
-We recommend limiting access to the Lambda function using
-[least-privilege IAM policies](https://docs.aws.amazon.com/lambda/latest/dg/security-iam.html).
+- This package currently supports MCP servers and clients written in Python and Typescript.
+  Other languages such as Kotlin are not supported.
+- The server adapters only adapt stdio MCP servers, not servers written for other protocols such as SSE.
+- The server adapters does not maintain any MCP server state across Lambda function invocations.
+  Only stateless MCP servers are a good fit for using this adapter. For example, MCP servers
+  that invoke stateless tools like the [time MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/time)
+  or make stateless web requests like the [fetch MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch).
+  Stateful MCP servers are not a good fit, because they will lose their state on every request.
+  For example, MCP servers that manage data on disk or in memory such as
+  the [sqlite MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite),
+  the [filesystem MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem),
+  and the [git MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/git).
+- The server adapters ignore any MCP protocol notifications from the client to the server.
+- The server adapters do not provide mechanisms for managing any secrets needed by the wrapped
+  MCP server. For example, the [GitHub MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/github)
+  and the [Brave search MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)
+  require API keys to make requests to third-party APIs.
+  You can configure these API keys as
+  [encrypted environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html)
+  in the Lambda function's configuration. However, note that anyone with access to invoke the Lambda function
+  will then have access to use your API key to call the third-party APIs by invoking the function.
+  We recommend limiting access to the Lambda function using
+  [least-privilege IAM policies](https://docs.aws.amazon.com/lambda/latest/dg/security-iam.html).
 
 ## Examples
 
@@ -72,6 +72,7 @@ that runs the simple
 The Lambda function bundles the [mcp-server-time package](https://pypi.org/project/mcp-server-time/).
 On each function invocation, the Lambda function will manage the lifecycle of the bundled MCP server.
 It will:
+
 1. start the 'time' MCP server as a child process
 1. initialize the MCP server
 1. forward the incoming request to the local server
@@ -107,6 +108,7 @@ to provide a single API from [weather.gov](https://www.weather.gov/documentation
 The Lambda function bundles the [openapi-mcp-server package](https://www.npmjs.com/package/openapi-mcp-server).
 On each function invocation, the Lambda function will manage the lifecycle of the bundled MCP server.
 It will:
+
 1. start the 'openapi-mcp-server' MCP server as a child process
 1. initialize the MCP server
 1. forward the incoming request to the local server
@@ -114,12 +116,12 @@ It will:
 1. shut down the MCP server child process
 
 ```typescript
-import { Handler, Context } from 'aws-lambda';
-import { stdioServerAdapter } from 'mcp-lambda';
+import { Handler, Context } from "aws-lambda";
+import { stdioServerAdapter } from "mcp-lambda";
 
 const serverParams = {
-  command: 'npx',
-  args: ['--offline', 'openapi-mcp-server', './weather-alerts-openapi.json'],
+  command: "npx",
+  args: ["--offline", "openapi-mcp-server", "./weather-alerts-openapi.json"],
 };
 
 export const handler: Handler = async (event, context: Context) => {
@@ -205,7 +207,7 @@ npm run build
 cdk deploy --app 'node lib/weather-alerts-mcp-server.js'
 ```
 
-Run the chatbot client:
+Run the Python-based chatbot client:
 
 ```bash
 cd examples/chatbot/
@@ -215,7 +217,22 @@ uv pip install -r requirements.txt
 python main.py
 ```
 
+Alternatively, run the Typescript-based chatbot client:
+
+```bash
+cd examples/chatbot-typescript/
+
+npm install
+
+npm link mcp-lambda
+
+npm run build
+
+npm run start
+```
+
 The chatbot client will communicate with three servers:
+
 1. the Lambda function-based 'time' MCP server
 2. the Lambda function-based 'weather-alerts' MCP server
 3. a [local 'fetch' MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch)
