@@ -132,7 +132,7 @@ export const handler: Handler = async (event, context: Context) => {
 ### Python client example
 
 This project includes an
-[example Python MCP client](examples/chatbot/server_clients/lambda_function.py)
+[example Python MCP client](examples/chatbots/python/server_clients/lambda_function.py)
 that invokes the 'time' MCP server function from above.
 The client invokes a Lambda function named "mcp-server-time" with a payload that is compliant
 with the MCP protocol and returns the function's response to the caller.
@@ -210,7 +210,7 @@ cdk deploy --app 'node lib/weather-alerts-mcp-server.js'
 Run the Python-based chatbot client:
 
 ```bash
-cd examples/chatbot/
+cd examples/chatbots/python/
 
 uv pip install -r requirements.txt
 
@@ -220,7 +220,7 @@ python main.py
 Alternatively, run the Typescript-based chatbot client:
 
 ```bash
-cd examples/chatbot-typescript/
+cd examples/chatbots/typescript/
 
 npm install
 

@@ -1,56 +1,56 @@
 version: 2
 updates:
-- package-ecosystem: pip
-  directory: "/src/python"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: pip
-  directory: "/e2e_tests/python"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: pip
-  directory: "/examples/chatbot"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: pip
-  directory: "/examples/servers/time"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: pip
-  directory: "/examples/servers/time/function"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: npm
-  directory: "/src/typescript"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: npm
-  directory: "/e2e_tests/typescript"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: npm
-  directory: "/examples/chatbot-typescript"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
-- package-ecosystem: npm
-  directory: "/examples/servers/weather-alerts"
-  schedule:
-    interval: monthly
-  open-pull-requests-limit: 10
-  versioning-strategy: increase
+  - package-ecosystem: pip
+    directory: "/src/python"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: pip
+    directory: "/e2e_tests/python"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: pip
+    directory: "/examples/chatbots/python"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: pip
+    directory: "/examples/servers/time"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: pip
+    directory: "/examples/servers/time/function"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: npm
+    directory: "/src/typescript"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: npm
+    directory: "/e2e_tests/typescript"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: npm
+    directory: "/examples/chatbots/typescript"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: npm
+    directory: "/examples/servers/weather-alerts"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
