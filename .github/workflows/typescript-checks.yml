@@ -42,8 +42,12 @@ jobs:
         with:
           node-version: 20
 
+      - name: Build and link mcp-lambda package
+        run: npm ci && npm run build && npm link
+        working-directory: ./src/typescript
+
       - name: Install dependencies
-        run: npm ci
+        run: npm ci && npm link mcp-lambda
         working-directory: ./examples/chatbots/typescript
 
       - name: Build
