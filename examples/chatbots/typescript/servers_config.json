@@ -1,8 +1,8 @@
 {
   "stdioServers": {
     "fetch": {
-      "command": "npx",
-      "args": ["--offline", "@modelcontextprotocol/server-fetch"]
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
     }
   },
   "lambdaFunctionServers": {
