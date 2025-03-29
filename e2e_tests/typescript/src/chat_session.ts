@@ -1,4 +1,3 @@
-import * as readline from "readline-sync";
 import { Server } from "./server_clients/server.js";
 import { Servers } from "./server_clients/servers.js";
 import { LLMClient } from "./llm_client.js";
@@ -15,10 +14,16 @@ import {
 export class ChatSession {
   private servers: Server[];
   private llmClient: LLMClient;
+  private userUtterances: string[] = [];
 
-  constructor(servers: Server[], llmClient: LLMClient) {
+  constructor(
+    servers: Server[],
+    llmClient: LLMClient,
+    userUtterances: string[]
+  ) {
     this.servers = servers;
     this.llmClient = llmClient;
+    this.userUtterances = userUtterances;
   }
 
   /**
@@ -76,12 +81,13 @@ export class ChatSession {
 
       const messages: Message[] = [];
 
-      while (true) {
-        const userInput = readline.question("\nYou: ").trim().toLowerCase();
-        if (userInput === "quit" || userInput === "exit") {
-          logger.info("\nExiting...");
-          break;
+      for (const [i, userInput] of this.userUtterances.entries()) {
+        if (i != 0) {
+          console.log("\n**Pausing 5 seconds to avoid Bedrock throttling**");
+          await new Promise((resolve) => setTimeout(resolve, 5000));
         }
+
+        console.log(`\You: ${userInput}`);
 
         messages.push({ role: "user", content: [{ text: userInput }] });
 
