@@ -37,12 +37,6 @@ updates:
     open-pull-requests-limit: 10
     versioning-strategy: increase
   - package-ecosystem: npm
-    directory: "/e2e_tests/typescript"
-    schedule:
-      interval: monthly
-    open-pull-requests-limit: 10
-    versioning-strategy: increase
-  - package-ecosystem: npm
     directory: "/examples/chatbots/typescript"
     schedule:
       interval: monthly
@@ -50,6 +44,12 @@ updates:
     versioning-strategy: increase
   - package-ecosystem: npm
     directory: "/examples/servers/weather-alerts"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+  - package-ecosystem: npm
+    directory: "/e2e_tests/typescript"
     schedule:
       interval: monthly
     open-pull-requests-limit: 10
