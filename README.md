@@ -151,6 +151,29 @@ session = ClientSession(read, write)
 await session.initialize()
 ```
 
+### Typescript client example
+
+This project includes an
+[example Typescript MCP client](examples/chatbots/typescript/src/server_clients/lambda_function.ts)
+that invokes the 'time' MCP server function from above.
+The client invokes a Lambda function named "mcp-server-time" with a payload that is compliant
+with the MCP protocol and returns the function's response to the caller.
+
+```typescript
+import {
+  LambdaFunctionParameters,
+  LambdaFunctionClientTransport,
+} from "mcp-lambda";
+
+const serverParams: LambdaFunctionParameters = {
+  functionName: "mcp-server-time",
+  regionName: "us-east-2",
+};
+
+const transport = new LambdaFunctionClientTransport(serverParams);
+await this.client.connect(transport);
+```
+
 ### Deploy and run the examples
 
 First, install the [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install).
