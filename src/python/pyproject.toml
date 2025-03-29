@@ -57,6 +57,7 @@ log_format = "%(asctime)s - %(levelname)s - %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli_level = "DEBUG"
 log_cli = true
+addopts = "--cov=src/mcp_lambda --cov-report=term --cov-report=html --cov-fail-under=90"
 
 [tool.pytest_env]
 LOG_LEVEL = "DEBUG"
