@@ -194,12 +194,26 @@ uv run pyright
 uv run pytest
 ```
 
+Create an IAM role for the example Lambda functions:
+
+```bash
+aws iam create-role \
+  --role-name mcp-lambda-example-servers \
+  --assume-role-policy-document file://examples/servers/lambda-assume-role-policy.json
+
+aws iam attach-role-policy \
+  --role-name mcp-lambda-example-servers \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+```
+
 Deploy the Lambda 'time' function - the deployed function will be named "mcp-server-time".
 
 ```bash
 cd examples/servers/time/
 
 uv pip install -r requirements.txt
+
+cdk bootstrap aws://<aws account id>/us-east-2
 
 cdk deploy --app 'python3 cdk_stack.py'
 ```
@@ -226,6 +240,8 @@ npm install
 npm link mcp-lambda
 
 npm run build
+
+cdk bootstrap aws://<aws account id>/us-east-2
 
 cdk deploy --app 'node lib/weather-alerts-mcp-server.js'
 ```

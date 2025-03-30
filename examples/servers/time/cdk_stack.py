@@ -3,6 +3,7 @@ from aws_cdk import (
     DockerVolume,
     Environment,
     Stack,
+    aws_iam as iam,
     aws_lambda as lambda_,
     aws_lambda_python_alpha as lambda_python,
 )
@@ -40,6 +41,7 @@ class LambdaTimeMcpServer(Stack):
             self,
             "ServerFunction",
             function_name="mcp-server-time",
+            role=iam.Role.from_role_name(self, "Role", "mcp-lambda-example-servers"),
             runtime=lambda_.Runtime.PYTHON_3_13,
             entry="function",
             memory_size=2048,
