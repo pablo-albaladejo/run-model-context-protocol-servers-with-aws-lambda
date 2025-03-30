@@ -6,7 +6,12 @@ import { Role } from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 
 export class WeatherAlertsMcpServer extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    stackNameSuffix: string,
+    props?: cdk.StackProps
+  ) {
     super(scope, id, props);
 
     // Package local module as a layer for testing
@@ -28,7 +33,7 @@ export class WeatherAlertsMcpServer extends cdk.Stack {
     });
 
     new NodejsFunction(this, "function", {
-      functionName: "mcp-server-weather-alerts",
+      functionName: "mcp-server-weather-alerts" + stackNameSuffix,
       role: Role.fromRoleName(this, "role", "mcp-lambda-example-servers"),
       memorySize: 2048,
       runtime: Runtime.NODEJS_22_X,
@@ -56,7 +61,15 @@ export class WeatherAlertsMcpServer extends cdk.Stack {
 }
 
 const app = new cdk.App();
-new WeatherAlertsMcpServer(app, "LambdaMcpServer-WeatherAlerts", {
-  env: { account: process.env["CDK_DEFAULT_ACCOUNT"], region: "us-east-2" },
-});
+const stackNameSuffix =
+  "INTEG_TEST_ID" in process.env ? `-${process.env["INTEG_TEST_ID"]}` : "";
+new WeatherAlertsMcpServer(
+  app,
+  "LambdaMcpServer-WeatherAlerts",
+  stackNameSuffix,
+  {
+    env: { account: process.env["CDK_DEFAULT_ACCOUNT"], region: "us-east-2" },
+    stackName: "LambdaMcpServer-WeatherAlerts" + stackNameSuffix,
+  }
+);
 app.synth();

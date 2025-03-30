@@ -1,0 +1,170 @@
+# This CloudFormation template configures an IAM identity provider that uses GitHub's OIDC,
+# enabling GitHub Actions to run the integration tests against the AWS account where this
+# template is deployed.
+#   aws cloudformation deploy \
+#       --template-file .github/cloudformation/integ-test-authentication.yaml \
+#       --stack-name github-integ-test-identity-provider \
+#       --parameter-overrides GitHubOrg=awslabs RepositoryName=utilities-for-model-context-protocol-with-aws-lambda \
+#       --capabilities CAPABILITY_IAM \
+#       --region us-east-2 \
+#       --profile mcp-lambda-cfn-integ-test-account
+
+Parameters:
+  GitHubOrg:
+    Description: Name of GitHub organization/user (case sensitive)
+    Type: String
+  RepositoryName:
+    Description: Name of GitHub repository (case sensitive)
+    Type: String
+  OIDCProviderArn:
+    Description: Arn for the GitHub OIDC Provider.
+    Default: ""
+    Type: String
+  OIDCAudience:
+    Description: Audience supplied to configure-aws-credentials.
+    Default: "sts.amazonaws.com"
+    Type: String
+
+Conditions:
+  CreateOIDCProvider: !Equals
+    - !Ref OIDCProviderArn
+    - ""
+
+Resources:
+  GithubOidc:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateOIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+
+  IntegrationTestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !If
+                - CreateOIDCProvider
+                - !Ref GithubOidc
+                - !Ref OIDCProviderArn
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: !Ref OIDCAudience
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/${RepositoryName}:*
+
+  IntegrationTestPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: mcp-lambda-integration-test-runner
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # Allow integration tests to manage CloudFormation stacks to deploy the example MCP servers
+          - Effect: Allow
+            Action:
+              - "cloudformation:ContinueUpdateRollback"
+              - "cloudformation:CreateChangeSet"
+              - "cloudformation:DeleteChangeSet"
+              - "cloudformation:DeleteStack"
+              - "cloudformation:DescribeChangeSet"
+              - "cloudformation:DescribeStacks"
+              - "cloudformation:ExecuteChangeSet"
+            Resource:
+              - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/LambdaMcpServer-*"
+          # Allow CloudFormation to provision the resources for the example MCP servers
+          - Effect: Allow
+            Action:
+              - "lambda:CreateFunction"
+              - "lambda:DeleteFunction"
+              - "lambda:DeleteFunctionCodeSigningConfig"
+              - "lambda:DeleteFunctionConcurrency"
+              - "lambda:GetCodeSigningConfig"
+              - "lambda:GetFunction"
+              - "lambda:GetFunctionCodeSigningConfig"
+              - "lambda:GetFunctionRecursionConfig"
+              - "lambda:GetLayerVersion"
+              - "lambda:GetRuntimeManagementConfig"
+              - "lambda:ListFunctions"
+              - "lambda:ListTags"
+              - "lambda:PutFunctionCodeSigningConfig"
+              - "lambda:PutFunctionConcurrency"
+              - "lambda:PutFunctionRecursionConfig"
+              - "lambda:PutRuntimeManagementConfig"
+              - "lambda:TagResource"
+              - "lambda:UntagResource"
+              - "lambda:UpdateFunctionCode"
+              - "lambda:UpdateFunctionConfiguration"
+              - "lambda:DeleteLayerVersion"
+              - "lambda:GetLayerVersion"
+              - "lambda:ListLayerVersions"
+              - "lambda:PublishLayerVersion"
+            Resource: "*"
+            Condition:
+              "ForAnyValue:StringEquals":
+                "aws:CalledVia":
+                  - cloudformation.amazonaws.com
+          - Effect: Allow
+            Action:
+              - "iam:PassRole"
+            Resource:
+              - !GetAtt LambdaFunctionsRole.Arn
+            Condition:
+              "ForAnyValue:StringEquals":
+                "aws:CalledVia":
+                  - cloudformation.amazonaws.com
+          - Effect: Allow
+            Action:
+              - "ssm:GetParametersByPath"
+              - "ssm:GetParameters"
+              - "ssm:GetParameter"
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cdk-bootstrap/*/version"
+            Condition:
+              "ForAnyValue:StringEquals":
+                "aws:CalledVia":
+                  - cloudformation.amazonaws.com
+          # Allow integration tests to upload templates and assets to the CDK bucket
+          - Effect: Allow
+            Action:
+              - "s3:PutObject"
+              - "s3:AbortMultipartUpload"
+              - "s3:ListMultipartUploadParts"
+            Resource:
+              - "arn:aws:s3:::cdk*/*"
+          # Allow CloudFormation and Lambda to download templates and assets from the CDK bucket
+          - Effect: Allow
+            Action:
+              - "s3:GetObject"
+              - "s3:GetObjectVersion"
+            Resource:
+              - "arn:aws:s3:::cdk*/*"
+            Condition:
+              "ForAnyValue:StringEquals":
+                "aws:CalledVia":
+                  - cloudformation.amazonaws.com
+      Roles:
+        - !Ref IntegrationTestRole
+
+  LambdaFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: mcp-lambda-example-servers
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: lambda.amazonaws.com
+
+Outputs:
+  Role:
+    Value: !GetAtt Role.Arn

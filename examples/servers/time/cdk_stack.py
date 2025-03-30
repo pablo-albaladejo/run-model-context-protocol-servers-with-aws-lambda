@@ -34,13 +34,15 @@ class CommandHooks:
 
 
 class LambdaTimeMcpServer(Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, construct_id: str, stack_name_suffix: str, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         lambda_python.PythonFunction(
             self,
             "ServerFunction",
-            function_name="mcp-server-time",
+            function_name="mcp-server-time" + stack_name_suffix,
             role=iam.Role.from_role_name(self, "Role", "mcp-lambda-example-servers"),
             runtime=lambda_.Runtime.PYTHON_3_13,
             entry="function",
@@ -65,9 +67,14 @@ class LambdaTimeMcpServer(Stack):
 
 app = App()
 env = Environment(account=os.environ["CDK_DEFAULT_ACCOUNT"], region="us-east-2")
+stack_name_suffix = (
+    f'-{os.environ["INTEG_TEST_ID"]}' if "INTEG_TEST_ID" in os.environ else ""
+)
 LambdaTimeMcpServer(
     app,
     "LambdaMcpServer-Time",
+    stack_name_suffix,
+    stack_name="LambdaMcpServer-Time" + stack_name_suffix,
     env=env,
 )
 app.synth()
