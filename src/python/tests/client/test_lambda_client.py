@@ -1,10 +1,10 @@
-import anyio
 import json
-import pytest
 import time
 from unittest import mock
 from unittest.mock import AsyncMock
 
+import anyio
+import pytest
 from mcp.types import (
     JSONRPCError,
     JSONRPCMessage,
@@ -12,9 +12,10 @@ from mcp.types import (
     JSONRPCRequest,
     JSONRPCResponse,
 )
+
 from mcp_lambda import (
-    lambda_function_client,
     LambdaFunctionParameters,
+    lambda_function_client,
 )
 
 lambda_parameters = LambdaFunctionParameters(
