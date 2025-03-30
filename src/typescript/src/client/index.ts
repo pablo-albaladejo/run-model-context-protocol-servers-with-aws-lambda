@@ -1,6 +1,6 @@
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js';
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 
 export type LambdaFunctionParameters = {
   /**
@@ -45,7 +45,7 @@ export class LambdaFunctionClientTransport implements Transport {
     try {
       const invokeCommand = new InvokeCommand({
         FunctionName: this._serverParams.functionName,
-        InvocationType: 'RequestResponse',
+        InvocationType: "RequestResponse",
         Payload: JSON.stringify(message),
       });
       const invokeCommandOutput = await this._lambdaClient.send(invokeCommand);
@@ -53,7 +53,7 @@ export class LambdaFunctionClientTransport implements Transport {
       if (invokeCommandOutput.Payload) {
         const responseMessage = Buffer.from(
           invokeCommandOutput.Payload
-        ).toString('utf-8');
+        ).toString("utf-8");
 
         if (invokeCommandOutput.FunctionError) {
           throw new Error(
@@ -61,12 +61,14 @@ export class LambdaFunctionClientTransport implements Transport {
           );
         }
 
-        if (responseMessage === '{}') {
+        if (responseMessage === "{}") {
           // Assume we sent a notification and do not expect a response
           return;
         }
 
         this.onmessage?.(JSON.parse(responseMessage));
+      } else {
+        throw new Error("No payload returned from Lambda function");
       }
     } catch (error) {
       this.onerror?.(error as Error);

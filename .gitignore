@@ -9,6 +9,7 @@ cdk.context.json
 !jest.config.js
 *.d.ts
 node_modules
+coverage/
 
 # Python
 __pycache__/
