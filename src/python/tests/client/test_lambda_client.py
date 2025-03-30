@@ -113,7 +113,7 @@ async def test_lambda_function_notification_success(mock_client_creator, mock_se
         async with read_stream:
             with pytest.raises(anyio.WouldBlock):
                 time.sleep(1)
-                await read_stream.receive_nowait()
+                read_stream.receive_nowait()
 
         # Verify Lambda was invoked with correct parameters
         mock_client.invoke.assert_called_once()
