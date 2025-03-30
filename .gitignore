@@ -1,3 +1,5 @@
+e2e_tests/integ-test-id
+
 # CDK asset staging directory
 .cdk.staging
 cdk.out
