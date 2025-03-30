@@ -81,30 +81,7 @@ Resources:
           # Allow CloudFormation to provision the resources for the example MCP servers
           - Effect: Allow
             Action:
-              - "lambda:CreateFunction"
-              - "lambda:DeleteFunction"
-              - "lambda:DeleteFunctionCodeSigningConfig"
-              - "lambda:DeleteFunctionConcurrency"
-              - "lambda:GetCodeSigningConfig"
-              - "lambda:GetFunction"
-              - "lambda:GetFunctionCodeSigningConfig"
-              - "lambda:GetFunctionRecursionConfig"
-              - "lambda:GetLayerVersion"
-              - "lambda:GetRuntimeManagementConfig"
-              - "lambda:ListFunctions"
-              - "lambda:ListTags"
-              - "lambda:PutFunctionCodeSigningConfig"
-              - "lambda:PutFunctionConcurrency"
-              - "lambda:PutFunctionRecursionConfig"
-              - "lambda:PutRuntimeManagementConfig"
-              - "lambda:TagResource"
-              - "lambda:UntagResource"
-              - "lambda:UpdateFunctionCode"
-              - "lambda:UpdateFunctionConfiguration"
-              - "lambda:DeleteLayerVersion"
-              - "lambda:GetLayerVersion"
-              - "lambda:ListLayerVersions"
-              - "lambda:PublishLayerVersion"
+              - "lambda:*"
             Resource: "*"
             Condition:
               "ForAnyValue:StringEquals":
@@ -149,6 +126,17 @@ Resources:
               "ForAnyValue:StringEquals":
                 "aws:CalledVia":
                   - cloudformation.amazonaws.com
+          # Allow integration tests to invoke Lambda functions and Bedrock models
+          - Effect: Allow
+            Action:
+              - "lambda:InvokeFunction"
+            Resource:
+              - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:mcp-server-*"
+          - Effect: Allow
+            Action:
+              - "bedrock:InvokeModel"
+            Resource:
+              - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
       Roles:
         - !Ref IntegrationTestRole
 
