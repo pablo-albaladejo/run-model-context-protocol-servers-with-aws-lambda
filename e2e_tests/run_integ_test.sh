@@ -26,9 +26,8 @@ cdk deploy --app 'node lib/weather-alerts-mcp-server.js'
 
 # Configure integ tests
 cd ../../../e2e_tests/
-sed -i "s/INTEG_TEST_ID/$INTEG_TEST_ID/g" servers_config.integ.json
-cp servers_config.integ.json python/servers_config.json
-cp servers_config.integ.json typescript/servers_config.json
+sed "s/INTEG_TEST_ID/$INTEG_TEST_ID/g" servers_config.integ.json > python/servers_config.json
+sed "s/INTEG_TEST_ID/$INTEG_TEST_ID/g" servers_config.integ.json > typescript/servers_config.json
 
 # Run the Python integ test
 cd python/
