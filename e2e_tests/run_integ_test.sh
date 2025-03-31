@@ -8,7 +8,10 @@ export INTEG_TEST_ID=$UUID
 echo $INTEG_TEST_ID > ./e2e_tests/integ-test-id
 
 # Deploy Python-based example MCP server
-cd examples/servers/time
+cd src/python
+uv sync --frozen --all-extras --dev
+
+cd ../../examples/servers/time
 uv pip install -r requirements.txt
 cdk deploy --app 'python3 cdk_stack.py'
 
