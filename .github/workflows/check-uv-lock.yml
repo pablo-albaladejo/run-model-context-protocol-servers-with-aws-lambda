@@ -3,12 +3,12 @@ name: Check uv.lock
 on:
   pull_request:
     paths:
-      - "pyproject.toml"
-      - "uv.lock"
+      - "src/python/pyproject.toml"
+      - "src/python/uv.lock"
   push:
     paths:
-      - "pyproject.toml"
-      - "uv.lock"
+      - "src/python/pyproject.toml"
+      - "src/python/uv.lock"
 
 jobs:
   check-lock:
