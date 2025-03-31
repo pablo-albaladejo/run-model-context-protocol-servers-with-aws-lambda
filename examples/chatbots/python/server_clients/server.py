@@ -93,12 +93,15 @@ class Server(ABC):
             try:
                 logging.info(f"Executing {tool_name}...")
                 result = await self.session.call_tool(tool_name, arguments)
+                logging.info(f"Finished executing {tool_name}")
 
                 if isinstance(result, dict) and "progress" in result:
                     progress = result["progress"]
                     total = result["total"]
                     percentage = (progress / total) * 100
-                    logging.info(f"Progress: {progress}/{total} " f"({percentage:.1f}%)")
+                    logging.info(
+                        f"Progress: {progress}/{total} " f"({percentage:.1f}%)"
+                    )
                     raise "Does not support progress notifications from tools yet"
 
                 return {

@@ -83,6 +83,7 @@ export abstract class Server {
           name: toolName,
           arguments: args,
         });
+        logger.info(`Finished executing ${toolName}`);
 
         if (result && typeof result === "object" && "progress" in result) {
           const progress = result.progress as number;

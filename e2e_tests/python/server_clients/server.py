@@ -93,6 +93,7 @@ class Server(ABC):
             try:
                 logging.info(f"Executing {tool_name}...")
                 result = await self.session.call_tool(tool_name, arguments)
+                logging.info(f"Finished executing {tool_name}")
 
                 return {
                     "toolUseId": tool_use_id,
