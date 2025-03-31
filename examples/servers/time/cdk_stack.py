@@ -2,10 +2,12 @@ from aws_cdk import (
     App,
     DockerVolume,
     Environment,
+    RemovalPolicy,
     Stack,
     aws_iam as iam,
     aws_lambda as lambda_,
     aws_lambda_python_alpha as lambda_python,
+    aws_logs as logs,
 )
 from constructs import Construct
 import jsii
@@ -39,11 +41,20 @@ class LambdaTimeMcpServer(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        log_group = logs.LogGroup(
+            self,
+            "ServerFunctionLogGroup",
+            log_group_name=f"mcp-server-time{stack_name_suffix}",
+            retention=logs.RetentionDays.ONE_DAY,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
+
         lambda_python.PythonFunction(
             self,
             "ServerFunction",
             function_name="mcp-server-time" + stack_name_suffix,
             role=iam.Role.from_role_name(self, "Role", "mcp-lambda-example-servers"),
+            log_group=log_group,
             runtime=lambda_.Runtime.PYTHON_3_13,
             entry="function",
             memory_size=2048,

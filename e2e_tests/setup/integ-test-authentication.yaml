@@ -82,6 +82,7 @@ Resources:
           - Effect: Allow
             Action:
               - "lambda:*"
+              - "logs:*"
             Resource: "*"
             Condition:
               "ForAnyValue:StringEquals":

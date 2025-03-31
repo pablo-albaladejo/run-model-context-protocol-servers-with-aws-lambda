@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Code, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
+import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 
@@ -30,11 +31,19 @@ export class WeatherAlertsMcpServer extends cdk.Stack {
         },
       }),
       compatibleRuntimes: [Runtime.NODEJS_22_X],
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const logGroup = new LogGroup(this, "LogGroup", {
+      logGroupName: "mcp-server-weather-alerts" + stackNameSuffix,
+      retention: RetentionDays.ONE_DAY,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     new NodejsFunction(this, "function", {
       functionName: "mcp-server-weather-alerts" + stackNameSuffix,
       role: Role.fromRoleName(this, "role", "mcp-lambda-example-servers"),
+      logGroup,
       memorySize: 2048,
       runtime: Runtime.NODEJS_22_X,
       environment: {
