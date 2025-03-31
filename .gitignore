@@ -1,4 +1,6 @@
 e2e_tests/integ-test-id
+e2e_tests/python/servers_config.json
+e2e_tests/typescript/servers_config.json
 
 # CDK asset staging directory
 .cdk.staging
