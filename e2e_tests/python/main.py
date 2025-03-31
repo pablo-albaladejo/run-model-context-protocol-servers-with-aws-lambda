@@ -11,7 +11,7 @@ from server_clients.lambda_function import LambdaFunctionClient
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logging.getLogger("aiobotocore").setLevel(logging.CRITICAL)
 logging.getLogger("boto3").setLevel(logging.CRITICAL)
