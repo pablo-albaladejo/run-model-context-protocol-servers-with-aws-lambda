@@ -38,7 +38,12 @@ jobs:
           aws-region: ${{ secrets.INTEG_TEST_REGION }}
 
       - name: Run tests
-        run: ./e2e_tests/run_integ_test.sh
+        run: |
+          cd src/python
+          uv venv
+          source .venv/bin/activate
+          cd ../..
+          ./e2e_tests/run_integ_test.sh
         timeout-minutes: 15
         working-directory: ${{ github.workspace }}
 
