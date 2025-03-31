@@ -2,10 +2,10 @@
 # enabling GitHub Actions to run the integration tests against the AWS account where this
 # template is deployed.
 #   aws cloudformation deploy \
-#       --template-file .github/cloudformation/integ-test-authentication.yaml \
+#       --template-file integ-test-authentication.yaml \
 #       --stack-name github-integ-test-identity-provider \
 #       --parameter-overrides GitHubOrg=awslabs RepositoryName=utilities-for-model-context-protocol-with-aws-lambda \
-#       --capabilities CAPABILITY_IAM \
+#       --capabilities CAPABILITY_NAMED_IAM \
 #       --region us-east-2 \
 #       --profile mcp-lambda-cfn-integ-test-account
 
@@ -156,4 +156,4 @@ Resources:
 
 Outputs:
   Role:
-    Value: !GetAtt Role.Arn
+    Value: !GetAtt IntegrationTestRole.Arn
