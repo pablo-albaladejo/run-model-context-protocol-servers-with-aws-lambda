@@ -6,12 +6,12 @@ requires-python = ">=3.11"
 
 dependencies = [
     "anyio>=4.5",
-    "aiobotocore>=2.20.0",
+    "aiobotocore>=2.21.1",
     "mcp>=1.4.1"
 ]
 
 [project.optional-dependencies]
-stubs = ["types-aiobotocore[lambda]>=2.20.0"]
+stubs = ["types-aiobotocore[lambda]>=2.21.1"]
 
 [tool.uv]
 resolution = "lowest-direct"

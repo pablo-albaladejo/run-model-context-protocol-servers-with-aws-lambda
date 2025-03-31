@@ -121,6 +121,9 @@ async def lambda_function_client(lambda_function: LambdaFunctionParameters):
                         await read_stream_writer.send(response_message)
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
+        except Exception as exc:
+            logging.exception(exc)
+            raise
 
     async with anyio.create_task_group() as tg:
         tg.start_soon(invoke_function)
