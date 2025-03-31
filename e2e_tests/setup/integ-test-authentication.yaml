@@ -78,6 +78,11 @@ Resources:
               - "cloudformation:ExecuteChangeSet"
             Resource:
               - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/LambdaMcpServer-*"
+          - Effect: Allow
+            Action:
+              - "ssm:GetParameter"
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cdk-bootstrap/*/version"
           # Allow CloudFormation to provision the resources for the example MCP servers
           - Effect: Allow
             Action:
@@ -93,17 +98,6 @@ Resources:
               - "iam:PassRole"
             Resource:
               - !GetAtt LambdaFunctionsRole.Arn
-            Condition:
-              "ForAnyValue:StringEquals":
-                "aws:CalledVia":
-                  - cloudformation.amazonaws.com
-          - Effect: Allow
-            Action:
-              - "ssm:GetParametersByPath"
-              - "ssm:GetParameters"
-              - "ssm:GetParameter"
-            Resource:
-              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cdk-bootstrap/*/version"
             Condition:
               "ForAnyValue:StringEquals":
                 "aws:CalledVia":
