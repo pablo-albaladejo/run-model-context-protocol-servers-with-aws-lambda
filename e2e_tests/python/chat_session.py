@@ -69,8 +69,8 @@ class ChatSession:
 
             for i, user_input in enumerate(self.user_utterances):
                 if i != 0:
-                    print("\n**Pausing 5 seconds to avoid Bedrock throttling**")
-                    await asyncio.sleep(5)
+                    print("\n**Pausing 15 seconds to avoid Bedrock throttling**")
+                    await asyncio.sleep(15)
 
                 print(f"\nYou: {user_input}")
 

@@ -2,6 +2,8 @@
 
 set -ex
 
+export LOG_LEVEL=debug
+
 # Get UUID to make the CloudFormation stacks unique per run
 UUID=$(uuidgen)
 export INTEG_TEST_ID=$UUID
