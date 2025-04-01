@@ -1,4 +1,4 @@
-name: Pull request integration tests
+name: Pull Request Integration Tests
 
 on:
   pull_request_target:
