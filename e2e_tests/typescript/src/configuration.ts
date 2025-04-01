@@ -1,5 +1,5 @@
-import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
-import * as fs from 'fs';
+import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
+import * as fs from "fs";
 
 /**
  * Manages configuration for the MCP client and the Bedrock client.
@@ -12,8 +12,8 @@ export class Configuration {
    * Initialize configuration.
    */
   constructor(
-    modelId: string = 'anthropic.claude-3-5-sonnet-20241022-v2:0',
-    region: string = 'us-west-2'
+    modelId: string = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+    region: string = "us-east-2"
   ) {
     this.modelId = modelId;
     this.region = region;
@@ -27,10 +27,10 @@ export class Configuration {
    */
   static loadConfig(filePath: string): Record<string, any> {
     try {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const fileContent = fs.readFileSync(filePath, "utf8");
       return JSON.parse(fileContent);
     } catch (e) {
-      if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((e as NodeJS.ErrnoException).code === "ENOENT") {
         throw new Error(`Configuration file not found: ${filePath}`);
       } else {
         throw new Error(`Error parsing configuration file: ${e}`);

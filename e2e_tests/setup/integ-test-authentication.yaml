@@ -1,13 +1,6 @@
 # This CloudFormation template configures an IAM identity provider that uses GitHub's OIDC,
 # enabling GitHub Actions to run the integration tests against the AWS account where this
 # template is deployed.
-#   aws cloudformation deploy \
-#       --template-file integ-test-authentication.yaml \
-#       --stack-name github-integ-test-identity-provider \
-#       --parameter-overrides GitHubOrg=awslabs RepositoryName=utilities-for-model-context-protocol-with-aws-lambda \
-#       --capabilities CAPABILITY_NAMED_IAM \
-#       --region us-east-2 \
-#       --profile mcp-lambda-cfn-integ-test-account
 
 Parameters:
   GitHubOrg:
@@ -69,58 +62,33 @@ Resources:
           # Allow integration tests to manage CloudFormation stacks to deploy the example MCP servers
           - Effect: Allow
             Action:
-              - "cloudformation:ContinueUpdateRollback"
-              - "cloudformation:CreateChangeSet"
-              - "cloudformation:DeleteChangeSet"
-              - "cloudformation:DeleteStack"
-              - "cloudformation:DescribeChangeSet"
-              - "cloudformation:DescribeStacks"
-              - "cloudformation:ExecuteChangeSet"
+              - "cloudformation:*"
             Resource:
               - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/LambdaMcpServer-*"
           - Effect: Allow
             Action:
               - "ssm:GetParameter"
+              - "ssm:GetParameters"
             Resource:
               - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cdk-bootstrap/*/version"
-          # Allow CloudFormation to provision the resources for the example MCP servers
-          - Effect: Allow
-            Action:
-              - "lambda:*"
-              - "logs:*"
-            Resource: "*"
-            Condition:
-              "ForAnyValue:StringEquals":
-                "aws:CalledVia":
-                  - cloudformation.amazonaws.com
           - Effect: Allow
             Action:
               - "iam:PassRole"
             Resource:
-              - !GetAtt LambdaFunctionsRole.Arn
-            Condition:
-              "ForAnyValue:StringEquals":
-                "aws:CalledVia":
-                  - cloudformation.amazonaws.com
-          # Allow integration tests to upload templates and assets to the CDK bucket
+              - !Sub "arn:aws:iam::${AWS::AccountId}:role/cdk-*-cfn-exec-role-${AWS::AccountId}-${AWS::Region}"
+          # Allow CDK to manage templates and assets in the CDK bucket
           - Effect: Allow
             Action:
               - "s3:PutObject"
               - "s3:AbortMultipartUpload"
               - "s3:ListMultipartUploadParts"
-            Resource:
-              - "arn:aws:s3:::cdk*/*"
-          # Allow CloudFormation and Lambda to download templates and assets from the CDK bucket
-          - Effect: Allow
-            Action:
               - "s3:GetObject"
               - "s3:GetObjectVersion"
+              - "s3:ListBucket"
+              - "s3:GetBucketLocation"
+              - "s3:GetEncryptionConfiguration"
             Resource:
-              - "arn:aws:s3:::cdk*/*"
-            Condition:
-              "ForAnyValue:StringEquals":
-                "aws:CalledVia":
-                  - cloudformation.amazonaws.com
+              - "arn:aws:s3:::cdk*"
           # Allow integration tests to invoke Lambda functions and Bedrock models
           - Effect: Allow
             Action:
@@ -134,6 +102,38 @@ Resources:
               - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
       Roles:
         - !Ref IntegrationTestRole
+
+  # CDK will bootstrap a role with this policy, and will set it
+  # as the role for all deployed CloudFormation stacks
+  CdkCfnExecutionPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: mcp-lambda-integ-test-cdk-cfn-execution
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "lambda:*"
+              - "logs:*"
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - "iam:PassRole"
+            Resource:
+              - !GetAtt LambdaFunctionsRole.Arn
+          - Effect: Allow
+            Action:
+              - "s3:GetObject"
+              - "s3:GetObjectVersion"
+            Resource:
+              - "arn:aws:s3:::cdk*"
+          - Effect: Allow
+            Action:
+              - "ssm:GetParameter"
+              - "ssm:GetParameters"
+            Resource:
+              - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/cdk-bootstrap/*/version"
 
   LambdaFunctionsRole:
     Type: AWS::IAM::Role

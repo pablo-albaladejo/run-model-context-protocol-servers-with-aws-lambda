@@ -49,5 +49,7 @@ jobs:
 
       - name: Clean up
         if: always()
-        run: ./e2e_tests/clean_up_integ_test.sh
+        run: |
+          source src/python/.venv/bin/activate
+          ./e2e_tests/clean_up_integ_test.sh
         working-directory: ${{ github.workspace }}

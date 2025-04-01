@@ -178,6 +178,9 @@ await this.client.connect(transport);
 
 First, install the [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install).
 
+Request [Bedrock model access](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/modelaccess)
+to Anthropic Claude 3.5 Sonnet v2 in region us-east-2.
+
 Install the mcp-lambda Python module from source:
 
 ```bash
@@ -194,7 +197,7 @@ uv run pyright
 uv run pytest
 ```
 
-Create an IAM role for the example Lambda functions:
+Create an IAM role for the example Lambda functions and bootstrap the account for CDK:
 
 ```bash
 aws iam create-role \
@@ -204,6 +207,8 @@ aws iam create-role \
 aws iam attach-role-policy \
   --role-name mcp-lambda-example-servers \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+cdk bootstrap aws://<aws account id>/us-east-2
 ```
 
 Deploy the Lambda 'time' function - the deployed function will be named "mcp-server-time".
@@ -212,8 +217,6 @@ Deploy the Lambda 'time' function - the deployed function will be named "mcp-ser
 cd examples/servers/time/
 
 uv pip install -r requirements.txt
-
-cdk bootstrap aws://<aws account id>/us-east-2
 
 cdk deploy --app 'python3 cdk_stack.py'
 ```
@@ -240,8 +243,6 @@ npm install
 npm link mcp-lambda
 
 npm run build
-
-cdk bootstrap aws://<aws account id>/us-east-2
 
 cdk deploy --app 'node lib/weather-alerts-mcp-server.js'
 ```
