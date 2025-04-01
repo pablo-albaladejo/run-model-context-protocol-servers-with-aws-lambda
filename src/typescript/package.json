@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "prepack": "tsc",
     "clean": "rm -rf dist/",
     "lint": "eslint src/",
     "test": "jest",
