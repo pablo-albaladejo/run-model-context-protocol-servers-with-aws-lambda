@@ -12,5 +12,3 @@ jobs:
     uses: ./.github/workflows/typescript-checks.yml
   cdk:
     uses: ./.github/workflows/cdk-checks.yml
-  integ-test:
-    uses: ./.github/workflows/integ-tests.yml

@@ -3,6 +3,9 @@ name: Integ Tests
 on:
   workflow_dispatch: {}
   workflow_call:
+  push:
+    branches:
+      - main
 
 jobs:
   integ_tests:
