@@ -76,31 +76,25 @@ class ChatSession:
 
                 messages.append({"role": "user", "content": [{"text": user_input}]})
 
-                llm_response = self.llm_client.get_response(
-                    messages, system_prompt, tools_description
-                )
-                logging.debug("\nAssistant: %s", json.dumps(llm_response, indent=2))
-                print(
-                    f'\nAssistant: {llm_response["output"]["message"]["content"][0]["text"]}'
-                )
-                messages.append(llm_response["output"]["message"])
-
-                tool_results = await self.execute_requested_tools(
-                    server_manager, llm_response
-                )
-
-                if tool_results:
-                    logging.debug(
-                        "\nTool Results: %s", json.dumps(tool_results, indent=2)
-                    )
-                    messages.append(tool_results)
-                    final_response = self.llm_client.get_response(
+                llm_response = None
+                while llm_response is None or llm_response["stopReason"] == "tool_use":
+                    # Get the next response
+                    llm_response = self.llm_client.get_response(
                         messages, system_prompt, tools_description
                     )
-                    logging.debug(
-                        "\nFinal response: %s", json.dumps(final_response, indent=2)
+                    messages.append(llm_response["output"]["message"])
+                    logging.debug("\nAssistant: %s", json.dumps(llm_response, indent=2))
+                    if "text" in llm_response["output"]["message"]["content"][0]:
+                        print(
+                            f'\nAssistant: {llm_response["output"]["message"]["content"][0]["text"]}'
+                        )
+
+                    # Execute tools if requested
+                    tool_results = await self.execute_requested_tools(
+                        server_manager, llm_response
                     )
-                    print(
-                        f'\nAssistant: {final_response["output"]["message"]["content"][0]["text"]}'
-                    )
-                    messages.append(final_response["output"]["message"])
+                    if tool_results:
+                        logging.debug(
+                            "\nTool Results: %s", json.dumps(tool_results, indent=2)
+                        )
+                        messages.append(tool_results)

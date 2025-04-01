@@ -91,40 +91,35 @@ export class ChatSession {
 
         messages.push({ role: "user", content: [{ text: userInput }] });
 
-        const llmResponse = await this.llmClient.getResponse(
-          messages,
-          systemPrompt,
-          toolsDescription
-        );
-
-        logger.debug("\nAssistant: " + JSON.stringify(llmResponse, null, 2));
-        console.log(
-          `\nAssistant: ${llmResponse.output!.message!.content![0].text}`
-        );
-        messages.push(llmResponse.output!.message!);
-
-        const toolResults = await this.executeRequestedTools(
-          serverManager,
-          llmResponse
-        );
-
-        if (toolResults) {
-          logger.debug(
-            "\nTool Results: " + JSON.stringify(toolResults, null, 2)
-          );
-          messages.push(toolResults);
-          const finalResponse = await this.llmClient.getResponse(
+        let llmResponse: ConverseCommandOutput | null = null;
+        while (llmResponse === null || llmResponse.stopReason === "tool_use") {
+          // Get the next response
+          llmResponse = await this.llmClient.getResponse(
             messages,
             systemPrompt,
             toolsDescription
           );
-          logger.debug(
-            "\nFinal response: " + JSON.stringify(finalResponse, null, 2)
+          messages.push(llmResponse.output!.message!);
+
+          logger.debug("\nAssistant: " + JSON.stringify(llmResponse, null, 2));
+          if (llmResponse.output?.message?.content?.[0].text) {
+            console.log(
+              `\nAssistant: ${llmResponse.output!.message!.content![0].text}`
+            );
+          }
+
+          // Execute tools if requested
+          const toolResults = await this.executeRequestedTools(
+            serverManager,
+            llmResponse
           );
-          console.log(
-            `\nAssistant: ${finalResponse.output!.message!.content![0].text}`
-          );
-          messages.push(finalResponse.output!.message!);
+
+          if (toolResults) {
+            logger.debug(
+              "\nTool Results: " + JSON.stringify(toolResults, null, 2)
+            );
+            messages.push(toolResults);
+          }
         }
       }
     } finally {
