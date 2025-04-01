@@ -2,6 +2,7 @@ import asyncio
 import boto3
 import json
 import logging
+import os
 from typing import Any
 
 from chat_session import ChatSession
@@ -11,7 +12,8 @@ from server_clients.lambda_function import LambdaFunctionClient
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper()),
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 logging.getLogger("aiobotocore").setLevel(logging.CRITICAL)
 logging.getLogger("boto3").setLevel(logging.CRITICAL)
