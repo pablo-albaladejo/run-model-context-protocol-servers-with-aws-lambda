@@ -83,29 +83,17 @@ jobs:
     name: "Run unit tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pass unit tests
-        run: |
-          echo "Unit tests passed!"
-    # TODO re-enable real tests when the release script is worked out
-    #uses: ./.github/workflows/unit-tests.yml
+    uses: ./.github/workflows/unit-tests.yml
 
   run_integration_tests:
     name: "Run integration tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pass integration tests
-        run: |
-          echo "Integration tests passed!"
-  # TODO re-enable real tests when the release script is worked out
-  # permissions:
-  #   id-token: write
-  #   contents: read
-  # secrets: inherit
-  # uses: ./.github/workflows/integ-tests.yml
+    permissions:
+      id-token: write
+      contents: read
+    secrets: inherit
+    uses: ./.github/workflows/integ-tests.yml
 
   release_new_version:
     name: "Release the new version"
@@ -162,13 +150,13 @@ jobs:
           echo Actual release: $NEW_VERSION
           exit 1
 
-      # TODO Publish new version to npm and PyPi
+      # Publish new version to npm and PyPi
       - name: Build Typescript library and publish to NPM
         run: |
           npm ci
-        #   npm publish --access public
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: ./src/typescript
 
       - name: Build Python library
@@ -177,10 +165,10 @@ jobs:
           ls dist/
         working-directory: ./src/python
 
-      # - name: Publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     packages-dir: ./src/python/dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ./src/python/dist
 
       # Publish new version to GitHub
       - name: Push new version to GitHub
