@@ -7,6 +7,10 @@
   ],
   "bumpFiles": [
     {
+      "filename": "VERSION",
+      "type": "plain-text"
+    },
+    {
       "filename": "src/python/pyproject.toml",
       "type": "python"
     },
