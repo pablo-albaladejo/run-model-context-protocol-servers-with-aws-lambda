@@ -11,4 +11,5 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    secrets: inherit
     uses: ./.github/workflows/integ-tests.yml

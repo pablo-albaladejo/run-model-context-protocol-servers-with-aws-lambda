@@ -83,7 +83,7 @@ jobs:
     name: "Run unit tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
-    uses: ./.github/workflows/cdk-checks.yml
+    uses: ./.github/workflows/unit-tests.yml
 
   run_integration_tests:
     name: "Run integration tests"
@@ -92,6 +92,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    secrets: inherit
     uses: ./.github/workflows/integ-tests.yml
 
   release_new_version:
