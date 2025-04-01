@@ -25,7 +25,7 @@ class Configuration:
     def __init__(
         self,
         model_id="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        region="us-east-2",
+        region="us-west-2",
     ) -> None:
         """Initialize configuration."""
         self.model_id = model_id

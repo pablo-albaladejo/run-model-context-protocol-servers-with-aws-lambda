@@ -13,7 +13,7 @@ export class Configuration {
    */
   constructor(
     modelId: string = "anthropic.claude-3-5-sonnet-20241022-v2:0",
-    region: string = "us-east-2"
+    region: string = "us-west-2"
   ) {
     this.modelId = modelId;
     this.region = region;

@@ -178,8 +178,8 @@ await this.client.connect(transport);
 
 First, install the [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install).
 
-Request [Bedrock model access](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/modelaccess)
-to Anthropic Claude 3.5 Sonnet v2 in region us-east-2.
+Request [Bedrock model access](https://us-west-2.console.aws.amazon.com/bedrock/home?region=us-west-2#/modelaccess)
+to Anthropic Claude 3.5 Sonnet v2 in region us-west-2.
 
 Install the mcp-lambda Python module from source:
 

@@ -99,7 +99,7 @@ Resources:
             Action:
               - "bedrock:InvokeModel"
             Resource:
-              - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
+              - "arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
       Roles:
         - !Ref IntegrationTestRole
 
