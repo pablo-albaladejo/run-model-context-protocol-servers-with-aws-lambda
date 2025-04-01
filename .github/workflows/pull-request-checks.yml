@@ -14,4 +14,4 @@ jobs:
     uses: ./.github/workflows/cdk-checks.yml
   integ-test:
     if: contains(github.event.pull_request.labels.*.name, 'safe-to-test')
-    uses: ./.github/workflows/integ-test.yml
+    uses: ./.github/workflows/integ-tests.yml
