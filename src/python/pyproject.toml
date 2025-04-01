@@ -1,5 +1,5 @@
 [project]
-name = "mcp-lambda"
+name = "mcp-server-in-aws-lambda"
 dynamic = ["version"]
 description = "Model Context Protocol SDK for AWS Lambda"
 requires-python = ">=3.11"
@@ -21,7 +21,8 @@ dev-dependencies = [
     "ruff>=0.8.5",
     "trio>=0.26.2",
     "pytest-cov>=6.0.0",
-    "pytest-env>=1.1.5"
+    "pytest-env>=1.1.5",
+    "pre-commit>=4.2.0"
 ]
 
 [build-system]

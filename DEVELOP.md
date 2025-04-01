@@ -1,3 +1,14 @@
+# Development guide
+
+## Local tools
+
+Install pre-commit hooks to ensure that your commits follow conventional commit guidelines:
+
+```
+pip install pre-commit
+pre-commit install
+```
+
 ## Deploy and run the examples
 
 This guide will walk you through building the source code in this repository,
@@ -39,7 +50,7 @@ cdk bootstrap aws://<aws account id>/us-east-2
 
 ### Build the Python module
 
-Install the mcp-lambda Python module from source:
+Install the mcp-server-in-aws-lambda Python module from source:
 
 ```bash
 cd src/python/
@@ -57,7 +68,7 @@ uv run pytest
 
 ### Build the Typescript package
 
-Build the mcp-lambda Typescript module:
+Build the mcp-server-in-aws-lambda Typescript module:
 
 ```bash
 cd src/typescript/
@@ -90,7 +101,7 @@ cd examples/servers/weather-alerts/
 
 npm install
 
-npm link mcp-lambda
+npm link mcp-server-in-aws-lambda
 
 npm run build
 
@@ -118,7 +129,7 @@ cd examples/chatbots/typescript/
 
 npm install
 
-npm link mcp-lambda
+npm link mcp-server-in-aws-lambda
 
 npm run build
 
