@@ -425,7 +425,6 @@ wheels = [
 
 [[package]]
 name = "mcp-lambda"
-version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiobotocore" },

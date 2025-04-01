@@ -1,6 +1,6 @@
 [project]
 name = "mcp-lambda"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Model Context Protocol SDK for AWS Lambda"
 requires-python = ">=3.11"
 
@@ -25,8 +25,16 @@ dev-dependencies = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+bump = false
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_lambda"]
