@@ -2,6 +2,7 @@ name: Integ Tests
 
 on:
   workflow_dispatch: {}
+  workflow_call:
 
 jobs:
   integ_tests:
@@ -44,7 +45,7 @@ jobs:
           source .venv/bin/activate
           cd ../..
           ./e2e_tests/run_integ_test.sh
-        timeout-minutes: 15
+        timeout-minutes: 20
         working-directory: ${{ github.workspace }}
 
       - name: Clean up

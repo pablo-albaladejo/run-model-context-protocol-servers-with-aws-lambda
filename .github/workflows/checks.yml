@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-      - "v*.*.*"
-    tags:
-      - "v*.*.*"
 
 jobs:
   python:
@@ -15,3 +12,5 @@ jobs:
     uses: ./.github/workflows/typescript-checks.yml
   cdk:
     uses: ./.github/workflows/cdk-checks.yml
+  integ-test:
+    uses: ./.github/workflows/integ-test.yml

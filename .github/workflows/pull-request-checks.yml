@@ -1,7 +1,9 @@
 name: Pull request checks
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [main]
 
 jobs:
   python:
@@ -10,3 +12,6 @@ jobs:
     uses: ./.github/workflows/typescript-checks.yml
   cdk:
     uses: ./.github/workflows/cdk-checks.yml
+  integ-test:
+    if: contains(github.event.pull_request.labels.*.name, 'safe-to-test')
+    uses: ./.github/workflows/integ-test.yml
