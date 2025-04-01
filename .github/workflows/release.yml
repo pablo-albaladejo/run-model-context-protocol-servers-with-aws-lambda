@@ -119,3 +119,39 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Tag new version and update changelog
+        env:
+          PENDING_VERSION: ${{needs.stage_release.outputs.pending_version}}
+        run: |
+          commit-and-tag-version
+
+          NEW_VERSION=$(cat VERSION)
+          RELEASE_COMMIT_ID=$(git rev-parse HEAD)
+
+          echo "PENDING_VERSION=${PENDING_VERSION}" >> $GITHUB_ENV
+          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+          echo "RELEASE_COMMIT_ID=${RELEASE_COMMIT_ID}" >> $GITHUB_ENV
+
+      - name: Confirm version number
+        if: ${{ env.PENDING_VERSION != env.NEW_VERSION }}
+        run: |
+          echo Pending release and actual release numbers do not match
+          echo Pending release: $PENDING_VERSION
+          echo Actual release: $NEW_VERSION
+          exit 1
+
+      # TODO publish to npm and PyPi
+
+      # - name: Push new version to GitHub
+      #   run: |
+      #     git push origin HEAD:main
+      #     git push origin v$NEW_VERSION
+
+      # - name: Create GitHub release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     name: v${{ env.NEW_VERSION }}
+      #     tag_name: v${{ env.NEW_VERSION }}
+      #     target_commitish: ${{ env.RELEASE_COMMIT_ID }}
+      #     body: See the [changelog](CHANGELOG.md) for details about the changes included in this release.
