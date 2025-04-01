@@ -23,3 +23,4 @@ jobs:
 
       - name: Check uv.lock is up to date
         run: uv lock --check
+        working-directory: ./src/python
