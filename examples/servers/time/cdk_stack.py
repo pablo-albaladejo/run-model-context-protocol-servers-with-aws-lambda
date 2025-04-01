@@ -25,7 +25,7 @@ class CommandHooks:
             f"cp /mcp_lambda_src/pyproject.toml {output_dir}/mcp_lambda_build/pyproject.toml",
             f"cp /mcp_lambda_src/uv.lock {output_dir}/mcp_lambda_build/uv.lock",
             f"cp -r /mcp_lambda_src/src {output_dir}/mcp_lambda_build/src",
-            f"UV_CACHE_DIR={output_dir}/.cache UV_DYNAMIC_VERSIONING_BYPASS=0.0.1 {output_dir}/uv build --wheel --directory {output_dir}/mcp_lambda_build",
+            f"UV_CACHE_DIR={output_dir}/.cache {output_dir}/uv build --wheel --directory {output_dir}/mcp_lambda_build",
             f"python -m pip install {output_dir}/mcp_lambda_build/dist/*.whl -t {output_dir}",
             f"rm -r {output_dir}/mcp_lambda_build {output_dir}/.cache uv",
         ]

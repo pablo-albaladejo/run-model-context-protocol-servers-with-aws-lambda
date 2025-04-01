@@ -1,0 +1,120 @@
+name: Release mcp-lambda
+
+on:
+  workflow_dispatch: {}
+  # schedule:
+  #   - cron: "0 18 * * 2" # Tuesdays at 10 am PST, 11 am PDT
+
+jobs:
+  determine_release:
+    name: "Determine if release is needed"
+    runs-on: ubuntu-latest
+    outputs:
+      pending_version_number: ${{ steps.versiondetails.outputs.pendingversion }}
+      pending_version_available: ${{ steps.versiondetails.outputs.pendingversionavailable }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install commit-and-tag-version
+        run: |
+          npm install -g commit-and-tag-version@^12.5.0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for new commits to release
+        run: |
+          CURRENT_VERSION=$(cat VERSION)
+          COMMITS_TO_RELEASE=$(git log --pretty=oneline v$CURRENT_VERSION..HEAD | wc -l)
+
+          echo Current version: v$CURRENT_VERSION
+          echo Commits to release: $COMMITS_TO_RELEASE
+
+          echo "CURRENT_VERSION=${CURRENT_VERSION}" >> $GITHUB_ENV
+          echo "COMMITS_TO_RELEASE=${COMMITS_TO_RELEASE}" >> $GITHUB_ENV
+
+      - name: Check if no release needed
+        if: ${{ env.COMMITS_TO_RELEASE == 0 }}
+        run: |
+          echo No changes to release!
+          echo Current release: $CURRENT_VERSION
+
+      - name: Determine new version number
+        if: ${{ env.COMMITS_TO_RELEASE != 0 }}
+        run: |
+          commit-and-tag-version
+
+          NEW_VERSION=$(cat VERSION)
+          RELEASE_COMMIT_ID=$(git rev-parse HEAD)
+
+          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+          echo "RELEASE_COMMIT_ID=${RELEASE_COMMIT_ID}" >> $GITHUB_ENV
+
+      - name: Check if version was bumped
+        if: ${{ env.COMMITS_TO_RELEASE != 0 && env.NEW_VERSION == env.CURRENT_VERSION }}
+        run: |
+          echo No changes to release!
+          echo Current release: $CURRENT_VERSION
+
+      - name: "Show pending version details"
+        if: ${{ env.COMMITS_TO_RELEASE != 0 && env.NEW_VERSION != env.CURRENT_VERSION }}
+        id: versiondetails
+        shell: bash
+        run: |
+          echo New version: v$NEW_VERSION
+          echo Commit ID: $RELEASE_COMMIT_ID
+          echo Previous version: v$CURRENT_VERSION
+          echo Changes to be released:
+          git log --pretty=oneline v$CURRENT_VERSION..v$NEW_VERSION
+
+          git show v$NEW_VERSION
+
+          echo "pendingversion=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "pendingversionavailable=true" >> $GITHUB_OUTPUT
+
+  run_unit_tests:
+    name: "Run unit tests"
+    needs: determine_release
+    if: needs.determine_release.outputs.pending_version_available == 'true'
+    uses: ./.github/workflows/cdk-checks.yml
+
+  run_integration_tests:
+    name: "Run integration tests"
+    needs: determine_release
+    if: needs.determine_release.outputs.pending_version_available == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/integ-tests.yml
+
+  release_new_version:
+    name: "Release the new version"
+    needs: [determine_release, run_unit_tests, run_integration_tests]
+    if: needs.determine_release.outputs.pending_version_available == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install commit-and-tag-version
+        run: |
+          npm install -g commit-and-tag-version@^12.5.0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

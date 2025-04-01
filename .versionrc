@@ -1,0 +1,31 @@
+{
+  "packageFiles": [
+    {
+      "filename": "VERSION",
+      "type": "plain-text"
+    }
+  ],
+  "bumpFiles": [
+    {
+      "filename": "src/python/pyproject.toml",
+      "type": "python"
+    },
+    {
+      "filename": "src/typescript/package.json",
+      "type": "json"
+    },
+    {
+      "filename": "e2e_tests/typescript/package.json",
+      "type": "json"
+    },
+    {
+      "filename": "examples/servers/weather-alerts/package.json",
+      "type": "json"
+    },
+    {
+      "filename": "examples/chatbots/typescript/package.json",
+      "type": "json"
+    }
+  ],
+  "tagPrefix": "v"
+}
