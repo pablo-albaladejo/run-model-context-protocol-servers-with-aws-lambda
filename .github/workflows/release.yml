@@ -161,6 +161,7 @@ jobs:
 
       - name: Build Python library
         run: |
+          cd ../../README.md .
           uv build
           ls dist/
         working-directory: ./src/python

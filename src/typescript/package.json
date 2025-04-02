@@ -1,8 +1,27 @@
 {
   "name": "mcp-server-in-aws-lambda",
-  "description": "Model Context Protocol SDK for AWS Lambda",
+  "description": "Run Model Context Protocol (MCP) servers in AWS Lambda",
   "version": "0.0.2",
   "type": "module",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Amazon Web Services",
+    "url": "http://aws.amazon.com"
+  },
+  "homepage": "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda",
+  "repository": {
+    "type": "git",
+    "url": "github:awslabs/run-model-context-protocol-servers-in-aws-lambda.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda/issues"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "mcp",
+    "modelcontextprotocol"
+  ],
   "scripts": {
     "build": "tsc",
     "prepack": "tsc",

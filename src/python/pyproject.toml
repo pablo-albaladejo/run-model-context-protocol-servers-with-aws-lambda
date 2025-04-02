@@ -1,14 +1,34 @@
 [project]
 name = "mcp-server-in-aws-lambda"
 dynamic = ["version"]
-description = "Model Context Protocol SDK for AWS Lambda"
+description = "Run Model Context Protocol (MCP) servers in AWS Lambda"
 requires-python = ">=3.11"
+readme = "README.md"
+
+authors = [{ name = "Amazon Web Services" }]
+license = { text = "Apache License (2.0)" }
+
+keywords = ["aws", "lambda", "mcp", "modelcontextprotocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 
 dependencies = [
     "anyio>=4.5",
     "aiobotocore>=2.21.1",
     "mcp>=1.6.0"
 ]
+
+[project.urls]
+Repository = "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda"
+Issues = "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda/issues"
 
 [project.optional-dependencies]
 stubs = ["types-aiobotocore[lambda]>=2.21.1"]
