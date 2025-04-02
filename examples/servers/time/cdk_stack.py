@@ -14,6 +14,9 @@ import jsii
 import os
 
 
+# For testing, the mcp-server-in-aws-lambda module is built and bundled
+# from local files. Remove these command hooks if using the
+# mcp-server-in-aws-lambda from PyPi.
 @jsii.implements(lambda_python.ICommandHooks)
 class CommandHooks:
     @jsii.member(jsii_name="afterBundling")
@@ -22,6 +25,7 @@ class CommandHooks:
             f"cd {output_dir}",
             f"curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL='{output_dir}' sh",
             f"mkdir {output_dir}/mcp_lambda_build",
+            f"cp /mcp_lambda_src/README.md {output_dir}/mcp_lambda_build/README.md",
             f"cp /mcp_lambda_src/pyproject.toml {output_dir}/mcp_lambda_build/pyproject.toml",
             f"cp /mcp_lambda_src/uv.lock {output_dir}/mcp_lambda_build/uv.lock",
             f"cp -r /mcp_lambda_src/src {output_dir}/mcp_lambda_build/src",
@@ -61,7 +65,9 @@ class LambdaTimeMcpServer(Stack):
             environment={
                 "LOG_LEVEL": "DEBUG",
             },
-            # Workaround to install the local module during packaging for testing
+            # For testing, the mcp-server-in-aws-lambda module is built and bundled
+            # from local files. Remove the bundling configuration if using the
+            # mcp-server-in-aws-lambda from PyPi.
             bundling=lambda_python.BundlingOptions(
                 # asset_excludes=[".venv", ".mypy_cache", "__pycache__"],
                 volumes=[
