@@ -2,4 +2,4 @@ mcp-server-time
 
 # For testing, this module is installed from local files.
 # Uncomment this line to build using the module from PyPi
-# mcp-server-in-aws-lambda >= 0.0.1
+# mcp-server-with-aws-lambda >= 0.0.1

@@ -1,7 +1,7 @@
 import {
   LambdaFunctionParameters,
   LambdaFunctionClientTransport,
-} from "mcp-server-in-aws-lambda";
+} from "mcp-server-with-aws-lambda";
 import { Server } from "./server.js";
 import logger from "../logger.js";
 

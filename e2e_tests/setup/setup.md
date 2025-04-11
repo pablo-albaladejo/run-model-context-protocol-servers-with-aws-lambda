@@ -4,7 +4,7 @@ To set up an AWS account for running integration tests on GitHub:
 aws cloudformation deploy \
     --template-file integ-test-authentication.yaml \
     --stack-name github-integ-test-identity-provider \
-    --parameter-overrides GitHubOrg=awslabs RepositoryName=run-model-context-protocol-servers-in-aws-lambda \
+    --parameter-overrides GitHubOrg=awslabs RepositoryName=run-model-context-protocol-servers-with-aws-lambda \
     --capabilities CAPABILITY_NAMED_IAM \
     --region us-east-2
 

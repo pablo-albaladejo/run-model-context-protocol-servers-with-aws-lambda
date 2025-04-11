@@ -1,7 +1,7 @@
 [project]
-name = "mcp-server-in-aws-lambda"
+name = "mcp-server-with-aws-lambda"
 dynamic = ["version"]
-description = "Run Model Context Protocol (MCP) servers in AWS Lambda"
+description = "Run Model Context Protocol (MCP) servers with AWS Lambda"
 requires-python = ">=3.11"
 readme = "README.md"
 
@@ -27,8 +27,8 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda"
-Issues = "https://github.com/awslabs/run-model-context-protocol-servers-in-aws-lambda/issues"
+Repository = "https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda"
+Issues = "https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/issues"
 
 [project.optional-dependencies]
 stubs = ["types-aiobotocore[lambda]>=2.21.1"]

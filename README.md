@@ -1,4 +1,4 @@
-# Run Model Context Protocol (MCP) servers in AWS Lambda
+# Run Model Context Protocol (MCP) servers with AWS Lambda
 
 This project enables you to run [Model Context Protocol](https://modelcontextprotocol.io) stdio-based servers in AWS Lambda functions.
 
@@ -132,7 +132,7 @@ const serverParams = {
 
 export const handler: Handler = async (event, context: Context) => {
   // Dynamically import ES module into CommonJS Lambda function
-  const { stdioServerAdapter } = await import("mcp-server-in-aws-lambda");
+  const { stdioServerAdapter } = await import("mcp-server-with-aws-lambda");
 
   return await stdioServerAdapter(serverParams, event, context);
 };
@@ -172,7 +172,7 @@ with the MCP protocol and returns the function's response to the caller.
 import {
   LambdaFunctionParameters,
   LambdaFunctionClientTransport,
-} from "mcp-server-in-aws-lambda";
+} from "mcp-server-with-aws-lambda";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 const serverParams: LambdaFunctionParameters = {
