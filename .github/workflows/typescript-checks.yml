@@ -42,12 +42,12 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build and link mcp-server-with-aws-lambda package
+      - name: Build and link run-mcp-servers-with-aws-lambda package
         run: npm ci && npm run build && npm link
         working-directory: ./src/typescript
 
       - name: Install dependencies
-        run: npm ci && npm link mcp-server-with-aws-lambda
+        run: npm ci && npm link run-mcp-servers-with-aws-lambda
         working-directory: ./examples/chatbots/typescript
 
       - name: Build

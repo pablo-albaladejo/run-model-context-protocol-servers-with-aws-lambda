@@ -7,7 +7,9 @@ const serverParams = {
 
 export const handler: Handler = async (event, context: Context) => {
   // Dynamically import ES module into CommonJS Lambda function
-  const { stdioServerAdapter } = await import("mcp-server-with-aws-lambda");
+  const { stdioServerAdapter } = await import(
+    "run-mcp-servers-with-aws-lambda"
+  );
 
   return await stdioServerAdapter(serverParams, event, context);
 };

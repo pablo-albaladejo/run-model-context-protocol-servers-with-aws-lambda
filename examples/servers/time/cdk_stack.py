@@ -14,9 +14,9 @@ import jsii
 import os
 
 
-# For testing, the mcp-server-with-aws-lambda module is built and bundled
+# For testing, the run-mcp-servers-with-aws-lambda module is built and bundled
 # from local files. Remove these command hooks if using the
-# mcp-server-with-aws-lambda from PyPi.
+# run-mcp-servers-with-aws-lambda from PyPi.
 @jsii.implements(lambda_python.ICommandHooks)
 class CommandHooks:
     @jsii.member(jsii_name="afterBundling")
@@ -65,9 +65,9 @@ class LambdaTimeMcpServer(Stack):
             environment={
                 "LOG_LEVEL": "DEBUG",
             },
-            # For testing, the mcp-server-with-aws-lambda module is built and bundled
+            # For testing, the run-mcp-servers-with-aws-lambda module is built and bundled
             # from local files. Remove the bundling configuration if using the
-            # mcp-server-with-aws-lambda from PyPi.
+            # run-mcp-servers-with-aws-lambda from PyPi.
             bundling=lambda_python.BundlingOptions(
                 # asset_excludes=[".venv", ".mypy_cache", "__pycache__"],
                 volumes=[
