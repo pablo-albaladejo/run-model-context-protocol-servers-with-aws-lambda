@@ -11,7 +11,7 @@
   "homepage": "https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda",
   "repository": {
     "type": "git",
-    "url": "github:awslabs/run-model-context-protocol-servers-with-aws-lambda.git"
+    "url": "git+https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda.git"
   },
   "bugs": {
     "url": "https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/issues"
