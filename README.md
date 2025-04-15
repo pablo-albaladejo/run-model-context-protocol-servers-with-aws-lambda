@@ -133,7 +133,7 @@ const serverParams = {
 export const handler: Handler = async (event, context: Context) => {
   // Dynamically import ES module into CommonJS Lambda function
   const { stdioServerAdapter } = await import(
-    "run-mcp-servers-with-aws-lambda"
+    "@aws/run-mcp-servers-with-aws-lambda"
   );
 
   return await stdioServerAdapter(serverParams, event, context);
@@ -174,7 +174,7 @@ with the MCP protocol and returns the function's response to the caller.
 import {
   LambdaFunctionParameters,
   LambdaFunctionClientTransport,
-} from "run-mcp-servers-with-aws-lambda";
+} from "@aws/run-mcp-servers-with-aws-lambda";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 const serverParams: LambdaFunctionParameters = {

@@ -1,14 +1,5 @@
 # Development guide
 
-## Local tools
-
-Install pre-commit hooks to ensure that your commits follow conventional commit guidelines:
-
-```
-pip install pre-commit
-pre-commit install
-```
-
 ## Deploy and run the examples
 
 This guide will walk you through building the source code in this repository,
@@ -68,7 +59,7 @@ uv run pytest
 
 ### Build the Typescript package
 
-Build the run-mcp-servers-with-aws-lambda Typescript module:
+Build the @aws/run-mcp-servers-with-aws-lambda Typescript module:
 
 ```bash
 cd src/typescript/
@@ -101,7 +92,7 @@ cd examples/servers/weather-alerts/
 
 npm install
 
-npm link run-mcp-servers-with-aws-lambda
+npm link @aws/run-mcp-servers-with-aws-lambda
 
 npm run build
 
@@ -129,9 +120,18 @@ cd examples/chatbots/typescript/
 
 npm install
 
-npm link run-mcp-servers-with-aws-lambda
+npm link @aws/run-mcp-servers-with-aws-lambda
 
 npm run build
 
 npm run start
+```
+
+## Development tools
+
+Install pre-commit hooks to ensure that your commits follow conventional commit guidelines:
+
+```
+cd src/python
+uv run pre-commit install
 ```

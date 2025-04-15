@@ -1,5 +1,5 @@
 {
-  "name": "run-mcp-servers-with-aws-lambda",
+  "name": "@aws/run-mcp-servers-with-aws-lambda",
   "description": "Run Model Context Protocol (MCP) servers with AWS Lambda",
   "version": "0.0.2",
   "type": "module",
