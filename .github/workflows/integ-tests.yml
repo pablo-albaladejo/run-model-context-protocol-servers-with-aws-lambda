@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: "Check secrets"
+        run: |
+          if [ -z "${{ secrets.INTEG_TEST_ROLE_ARN }}" ]; then echo "Secret missing: INTEG_TEST_ROLE_ARN" && exit 1; fi
+          if [ -z "${{ secrets.INTEG_TEST_REGION }}" ]; then echo "Secret missing: INTEG_TEST_REGION" && exit 1; fi
+
       - name: "Set up Typescript"
         uses: actions/setup-node@v4
         with:

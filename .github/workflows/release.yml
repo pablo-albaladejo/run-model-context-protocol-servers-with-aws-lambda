@@ -16,6 +16,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: "Check secrets"
+        run: |
+          if [ -z "${{ secrets.INTEG_TEST_ROLE_ARN }}" ]; then echo "Secret missing: INTEG_TEST_ROLE_ARN" && exit 1; fi
+          if [ -z "${{ secrets.INTEG_TEST_REGION }}" ]; then echo "Secret missing: INTEG_TEST_REGION" && exit 1; fi
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then echo "Secret missing: NPM_TOKEN" && exit 1; fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
