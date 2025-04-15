@@ -158,6 +158,21 @@ jobs:
           echo Actual release: $NEW_VERSION
           exit 1
 
+      # Publish new version to GitHub
+      - name: Push new version to GitHub
+        run: |
+          git push origin HEAD:main
+          git push origin v$NEW_VERSION
+        working-directory: ./
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: v${{ env.NEW_VERSION }}
+          tag_name: v${{ env.NEW_VERSION }}
+          target_commitish: ${{ env.RELEASE_COMMIT_ID }}
+          body: See the [changelog](CHANGELOG.md) for details about the changes included in this release.
+
       # Publish new version to npm and PyPi
       - name: Build Typescript library and publish to NPM
         run: |
@@ -179,18 +194,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: ./src/python/dist
-
-      # Publish new version to GitHub
-      - name: Push new version to GitHub
-        run: |
-          git push origin HEAD:main
-          git push origin v$NEW_VERSION
-        working-directory: ./
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: v${{ env.NEW_VERSION }}
-          tag_name: v${{ env.NEW_VERSION }}
-          target_commitish: ${{ env.RELEASE_COMMIT_ID }}
-          body: See the [changelog](CHANGELOG.md) for details about the changes included in this release.
