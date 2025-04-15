@@ -2,8 +2,8 @@ name: Release
 
 on:
   workflow_dispatch: {}
-  # schedule:
-  #   - cron: "0 18 * * 2" # Tuesdays at 10 am PST, 11 am PDT
+  schedule:
+    - cron: "0 18 * * 2" # Tuesdays at 10 am PST, 11 am PDT
 
 jobs:
   determine_release:
@@ -96,15 +96,11 @@ jobs:
     name: "Run integration tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo Pass!
-    # TODO re-enable integ tests after debugging release workflow
-    # permissions:
-    #   id-token: write
-    #   contents: read
-    # secrets: inherit
-    # uses: ./.github/workflows/integ-tests.yml
+    permissions:
+      id-token: write
+      contents: read
+    secrets: inherit
+    uses: ./.github/workflows/integ-tests.yml
 
   release_new_version:
     name: "Release the new version"
