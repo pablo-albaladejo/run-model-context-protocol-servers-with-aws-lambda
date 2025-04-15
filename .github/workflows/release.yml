@@ -165,6 +165,7 @@ jobs:
       # Publish new version to npm and PyPi
       - name: Build Typescript library and publish to NPM
         run: |
+          cp ../../README.md .
           npm ci
           npm publish --access public
         env:
@@ -173,7 +174,7 @@ jobs:
 
       - name: Build Python library
         run: |
-          cd ../../README.md .
+          cp ../../README.md .
           uv build
           ls dist/
         working-directory: ./src/python
