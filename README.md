@@ -38,6 +38,8 @@ flowchart LR
 
 ## Considerations
 
+- If you are looking for a way to invoke existing Lambda functions as tools through MCP,
+  see the [AWS Lambda MCP Server project](https://awslabs.github.io/mcp/servers/lambda-mcp-server/).
 - This package currently requires using a custom MCP client transport to communicate with the MCP
   server by invoking the Lambda function. Existing applications with MCP support such as
   Amazon Q Developer CLI, Cline, etc do not have this custom transport, and cannot communicate with
