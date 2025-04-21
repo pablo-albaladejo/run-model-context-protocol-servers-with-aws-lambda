@@ -51,7 +51,7 @@ jobs:
         run: |
           cd src/python
           uv venv
-          source .venv/bin/activate
+          if [ -f .venv/bin/activate ]; then source .venv/bin/activate; else echo "Virtual environment activation failed" && exit 1; fi
           cd ../..
           ./e2e_tests/run_integ_test.sh
         timeout-minutes: 20
