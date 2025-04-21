@@ -7,6 +7,8 @@ jobs:
   check_time_server:
     name: Check Python-based Time Server
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +43,8 @@ jobs:
   check_weather_alerts_server:
     name: Check Typescript-based Weather Alerts Server
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

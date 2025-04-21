@@ -9,6 +9,8 @@ jobs:
   determine_release:
     name: "Determine if release is needed"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     outputs:
       pending_version_number: ${{ steps.versiondetails.outputs.pendingversion }}
@@ -91,6 +93,8 @@ jobs:
     name: "Run unit tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
+    permissions:
+      contents: read
     timeout-minutes: 15
     uses: ./.github/workflows/unit-tests.yml
 
