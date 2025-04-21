@@ -11,6 +11,7 @@ jobs:
   integ_tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: read

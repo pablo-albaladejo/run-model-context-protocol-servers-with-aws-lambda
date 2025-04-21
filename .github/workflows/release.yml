@@ -9,6 +9,7 @@ jobs:
   determine_release:
     name: "Determine if release is needed"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       pending_version_number: ${{ steps.versiondetails.outputs.pendingversion }}
       pending_version_available: ${{ steps.versiondetails.outputs.pendingversionavailable }}
@@ -90,6 +91,7 @@ jobs:
     name: "Run unit tests"
     needs: determine_release
     if: needs.determine_release.outputs.pending_version_available == 'true'
+    timeout-minutes: 15
     uses: ./.github/workflows/unit-tests.yml
 
   run_integration_tests:
@@ -100,6 +102,7 @@ jobs:
       id-token: write
       contents: read
     secrets: inherit
+    timeout-minutes: 30
     uses: ./.github/workflows/integ-tests.yml
 
   release_new_version:
@@ -107,6 +110,7 @@ jobs:
     needs: [determine_release, run_unit_tests, run_integration_tests]
     if: needs.determine_release.outputs.pending_version_available == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
       id-token: write

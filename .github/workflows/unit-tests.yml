@@ -9,8 +9,11 @@ on:
 
 jobs:
   python:
+    timeout-minutes: 15
     uses: ./.github/workflows/python-checks.yml
   typescript:
+    timeout-minutes: 15
     uses: ./.github/workflows/typescript-checks.yml
   cdk:
+    timeout-minutes: 15
     uses: ./.github/workflows/cdk-checks.yml
