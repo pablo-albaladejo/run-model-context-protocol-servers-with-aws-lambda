@@ -24,6 +24,10 @@ jobs:
         run: uv sync --frozen --all-extras --dev
         working-directory: ./src/python
 
+      - uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: ./src/python
+
       - name: Build
         run: uv build
         working-directory: ./src/python
