@@ -4,6 +4,7 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Code, LayerVersion, Runtime } from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
+import { AwsSolutionsChecks } from "cdk-nag";
 import * as path from "path";
 
 export class WeatherAlertsMcpServer extends cdk.Stack {
@@ -75,7 +76,7 @@ export class WeatherAlertsMcpServer extends cdk.Stack {
 const app = new cdk.App();
 const stackNameSuffix =
   "INTEG_TEST_ID" in process.env ? `-${process.env["INTEG_TEST_ID"]}` : "";
-new WeatherAlertsMcpServer(
+const stack = new WeatherAlertsMcpServer(
   app,
   "LambdaMcpServer-WeatherAlerts",
   stackNameSuffix,
@@ -84,4 +85,5 @@ new WeatherAlertsMcpServer(
     stackName: "LambdaMcpServer-WeatherAlerts" + stackNameSuffix,
   }
 );
+cdk.Aspects.of(stack).add(new AwsSolutionsChecks({ verbose: true }));
 app.synth();
