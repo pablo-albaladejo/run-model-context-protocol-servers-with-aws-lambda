@@ -1,5 +1,6 @@
 from aws_cdk import (
     App,
+    Aspects,
     DockerVolume,
     Environment,
     RemovalPolicy,
@@ -9,6 +10,7 @@ from aws_cdk import (
     aws_lambda_python_alpha as lambda_python,
     aws_logs as logs,
 )
+from cdk_nag import AwsSolutionsChecks
 from constructs import Construct
 import jsii
 import os
@@ -87,11 +89,12 @@ env = Environment(account=os.environ["CDK_DEFAULT_ACCOUNT"], region="us-east-2")
 stack_name_suffix = (
     f'-{os.environ["INTEG_TEST_ID"]}' if "INTEG_TEST_ID" in os.environ else ""
 )
-LambdaTimeMcpServer(
+stack = LambdaTimeMcpServer(
     app,
     "LambdaMcpServer-Time",
     stack_name_suffix,
     stack_name="LambdaMcpServer-Time" + stack_name_suffix,
     env=env,
 )
+Aspects.of(stack).add(AwsSolutionsChecks(verbose=True))
 app.synth()
