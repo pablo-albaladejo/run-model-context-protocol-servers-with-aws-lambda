@@ -48,11 +48,18 @@ jobs:
         run: npm install -g aws-cdk
 
       - name: Build and link local package
-        run: npm ci && npm run build && npm link
+        run: |
+          npm ci
+          npm audit --audit-level critical
+          npm run build
+          npm link
         working-directory: ./src/typescript
 
       - name: Install dependencies
-        run: npm ci && npm link @aws/run-mcp-servers-with-aws-lambda
+        run: |
+          npm ci
+          npm audit --audit-level critical
+          npm link @aws/run-mcp-servers-with-aws-lambda
         working-directory: ./examples/servers/weather-alerts
 
       - name: Build
