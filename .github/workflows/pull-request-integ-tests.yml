@@ -12,5 +12,4 @@ jobs:
       id-token: write
       contents: read
     secrets: inherit
-    timeout-minutes: 30
     uses: ./.github/workflows/integ-tests.yml
