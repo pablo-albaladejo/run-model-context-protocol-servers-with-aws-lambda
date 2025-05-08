@@ -8,6 +8,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: pip
     directory: "/e2e_tests/python"
@@ -17,6 +18,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: pip
     directory: "/examples/chatbots/python"
@@ -26,6 +28,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: pip
     directory: "/examples/servers/time"
@@ -35,6 +38,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: pip
     directory: "/examples/servers/time/function"
@@ -44,6 +48,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: npm
     directory: "/src/typescript"
@@ -53,6 +58,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: npm
     directory: "/examples/chatbots/typescript"
@@ -62,6 +68,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: npm
     directory: "/examples/servers/weather-alerts"
@@ -71,6 +78,7 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
 
   - package-ecosystem: npm
     directory: "/e2e_tests/typescript"
@@ -80,3 +88,4 @@ updates:
     versioning-strategy: increase
     commit-message:
       prefix: "chore(deps)"
+    rebase-strategy: "disabled"
