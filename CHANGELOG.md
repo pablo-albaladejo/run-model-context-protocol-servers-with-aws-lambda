@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.6](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.1.5...v0.1.6) (2025-05-27)
+
+
+### Bug Fixes
+
+* Format response text from server in example client implementation ([c0523cf](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/commit/c0523cf087422726a657a6c5866af1c0fbaa24d3))
+
 ## [0.1.5](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.1.4...v0.1.5) (2025-05-13)
 
 ## [0.1.4](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.1.3...v0.1.4) (2025-04-22)
