@@ -56,6 +56,7 @@ source = "uv-dynamic-versioning"
 vcs = "git"
 style = "pep440"
 bump = false
+fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_lambda"]
