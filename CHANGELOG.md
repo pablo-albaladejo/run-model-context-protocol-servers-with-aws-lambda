@@ -1,9 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+All notable changes to this project will be documented in this file.
+See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+Chore-type changes such as dependency upgrades are not shown in this file, but can be seen by clicking on the version link.
 
 ## [0.2.0](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.1.6...v0.2.0) (2025-05-30)
 
+MCP 1.8.0 [introduced a new format for MCP client messages (SessionMessage)](https://github.com/modelcontextprotocol/python-sdk/commit/da0cf223553d50e48fba7652b2ef0eca26550e77).
+This 0.2.0 version upgrades the MCP version from MCP 1.6.0 to 1.9.2, and uses the new SessionMessage format for the Lambda client-side transport.
 
 ### ⚠ BREAKING CHANGES
 
