@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 
 import anyio
 import pytest
+from mcp.shared.message import SessionMessage
 from mcp.types import (
     JSONRPCError,
     JSONRPCMessage,
@@ -56,8 +57,8 @@ async def test_lambda_function_client_success(mock_client_creator, mock_session)
     )
 
     # Create a test message
-    test_message = JSONRPCMessage(
-        root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping")
+    test_message = SessionMessage(
+        JSONRPCMessage(root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping"))
     )
 
     async with lambda_function_client(lambda_parameters) as (read_stream, write_stream):
@@ -70,10 +71,11 @@ async def test_lambda_function_client_success(mock_client_creator, mock_session)
             response = await read_stream.receive()
 
         # Verify the response
-        assert isinstance(response, JSONRPCMessage)
-        assert isinstance(response.root, JSONRPCResponse)
-        assert response.root.id == "response-id"
-        assert response.root.result == {"message": "success"}
+        assert isinstance(response, SessionMessage)
+        assert isinstance(response.message, JSONRPCMessage)
+        assert isinstance(response.message.root, JSONRPCResponse)
+        assert response.message.root.id == "response-id"
+        assert response.message.root.result == {"message": "success"}
 
         # Verify Lambda was invoked with correct parameters
         mock_client.invoke.assert_called_once()
@@ -100,8 +102,10 @@ async def test_lambda_function_notification_success(mock_client_creator, mock_se
     )
 
     # Create a test message
-    test_message = JSONRPCMessage(
-        root=JSONRPCNotification(jsonrpc="2.0", method="notifications/initialized")
+    test_message = SessionMessage(
+        JSONRPCMessage(
+            root=JSONRPCNotification(jsonrpc="2.0", method="notifications/initialized")
+        )
     )
 
     async with lambda_function_client(lambda_parameters) as (read_stream, write_stream):
@@ -146,9 +150,11 @@ async def test_lambda_function_client_function_error(mock_client_creator, mock_s
     )
 
     # Create a test message
-    test_message = JSONRPCMessage(
-        root=JSONRPCRequest(
-            jsonrpc="2.0", id=1, method="call/tool", params={"hello": "world"}
+    test_message = SessionMessage(
+        JSONRPCMessage(
+            root=JSONRPCRequest(
+                jsonrpc="2.0", id=1, method="call/tool", params={"hello": "world"}
+            )
         )
     )
 
@@ -162,13 +168,15 @@ async def test_lambda_function_client_function_error(mock_client_creator, mock_s
             response = await read_stream.receive()
 
         # Verify the response is an error message
-        assert isinstance(response, JSONRPCMessage)
-        assert isinstance(response.root, JSONRPCError)
-        assert response.root.id == 1
-        assert response.root.error is not None
-        assert response.root.error.code == 500
+        assert isinstance(response, SessionMessage)
+        assert isinstance(response.message, JSONRPCMessage)
+        assert isinstance(response.message.root, JSONRPCError)
+        assert response.message.root.id == 1
+        assert response.message.root.error is not None
+        assert response.message.root.error.code == 500
         assert (
-            "Function invoke returned a function error" in response.root.error.message
+            "Function invoke returned a function error"
+            in response.message.root.error.message
         )
 
         # Verify Lambda was invoked with correct parameters
@@ -198,8 +206,8 @@ async def test_lambda_function_client_invoke_exception(
     mock_client.invoke.side_effect = Exception("Connection error")
 
     # Create a test message
-    test_message = JSONRPCMessage(
-        root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping")
+    test_message = SessionMessage(
+        JSONRPCMessage(root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping"))
     )
 
     async with lambda_function_client(lambda_parameters) as (read_stream, write_stream):
@@ -212,12 +220,13 @@ async def test_lambda_function_client_invoke_exception(
             response = await read_stream.receive()
 
         # Verify the response is an error message
-        assert isinstance(response, JSONRPCMessage)
-        assert isinstance(response.root, JSONRPCError)
-        assert response.root.id == 1
-        assert response.root.error is not None
-        assert response.root.error.code == 500
-        assert "Connection error" in response.root.error.message
+        assert isinstance(response, SessionMessage)
+        assert isinstance(response.message, JSONRPCMessage)
+        assert isinstance(response.message.root, JSONRPCError)
+        assert response.message.root.id == 1
+        assert response.message.root.error is not None
+        assert response.message.root.error.code == 500
+        assert "Connection error" in response.message.root.error.message
 
         # Verify Lambda was invoked with correct parameters
         mock_client.invoke.assert_called_once()
@@ -246,8 +255,8 @@ async def test_lambda_function_client_invalid_response(
     )
 
     # Create a test message
-    test_message = JSONRPCMessage(
-        root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping")
+    test_message = SessionMessage(
+        JSONRPCMessage(root=JSONRPCRequest(jsonrpc="2.0", id=1, method="ping"))
     )
 
     async with lambda_function_client(lambda_parameters) as (read_stream, write_stream):
@@ -260,12 +269,16 @@ async def test_lambda_function_client_invalid_response(
             response = await read_stream.receive()
 
         # Verify the response is an error message
-        assert isinstance(response, JSONRPCMessage)
-        assert isinstance(response.root, JSONRPCError)
-        assert response.root.id == 1
-        assert response.root.error is not None
-        assert response.root.error.code == 500
-        assert "4 validation errors for JSONRPCMessage" in response.root.error.message
+        assert isinstance(response, SessionMessage)
+        assert isinstance(response.message, JSONRPCMessage)
+        assert isinstance(response.message.root, JSONRPCError)
+        assert response.message.root.id == 1
+        assert response.message.root.error is not None
+        assert response.message.root.error.code == 500
+        assert (
+            "4 validation errors for JSONRPCMessage"
+            in response.message.root.error.message
+        )
 
         # Verify Lambda was invoked with correct parameters
         mock_client.invoke.assert_called_once()

@@ -6,6 +6,7 @@ import anyio.lowlevel
 import mcp.types as types
 from aiobotocore.session import get_session
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
+from mcp.shared.message import SessionMessage
 from pydantic import BaseModel
 
 
@@ -23,11 +24,11 @@ async def lambda_function_client(lambda_function: LambdaFunctionParameters):
     Client transport for Lambda functions: this will invoke a Lambda function
     when requests are sent to the client.
     """
-    read_stream: MemoryObjectReceiveStream[types.JSONRPCMessage | Exception]
-    read_stream_writer: MemoryObjectSendStream[types.JSONRPCMessage | Exception]
+    read_stream: MemoryObjectReceiveStream[SessionMessage | Exception]
+    read_stream_writer: MemoryObjectSendStream[SessionMessage | Exception]
 
-    write_stream: MemoryObjectSendStream[types.JSONRPCMessage]
-    write_stream_reader: MemoryObjectReceiveStream[types.JSONRPCMessage]
+    write_stream: MemoryObjectSendStream[SessionMessage]
+    write_stream_reader: MemoryObjectReceiveStream[SessionMessage]
 
     read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
     write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
@@ -44,7 +45,8 @@ async def lambda_function_client(lambda_function: LambdaFunctionParameters):
                 "lambda", region_name=lambda_function.region_name
             ) as lambda_client:
                 async with write_stream_reader:
-                    async for message in write_stream_reader:
+                    async for session_message in write_stream_reader:
+                        message = session_message.message
                         logging.debug(
                             f"MCP JSON RPC message raw: {message.__class__.__name__} {message}"
                         )
@@ -113,12 +115,15 @@ async def lambda_function_client(lambda_function: LambdaFunctionParameters):
                                         ),
                                     )
                                 )
-                                await read_stream_writer.send(error_message)
+                                await read_stream_writer.send(
+                                    SessionMessage(error_message)
+                                )
                             else:
                                 await read_stream_writer.send(exc)
                             continue
 
-                        await read_stream_writer.send(response_message)
+                        session_message = SessionMessage(response_message)
+                        await read_stream_writer.send(session_message)
         except anyio.ClosedResourceError:
             await anyio.lowlevel.checkpoint()
         except Exception as exc:
