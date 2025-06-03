@@ -1,8 +1,8 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
-Chore-type changes such as dependency upgrades are not shown in this file, but can be seen by clicking on the version link.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.2.1](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.2.0...v0.2.1) (2025-06-03)
 
 ## [0.2.0](https://github.com/awslabs/run-model-context-protocol-servers-with-aws-lambda/compare/v0.1.6...v0.2.0) (2025-05-30)
 
