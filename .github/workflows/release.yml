@@ -104,7 +104,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    secrets: inherit
+    secrets:
+      INTEG_TEST_ROLE_ARN: ${{ secrets.INTEG_TEST_ROLE_ARN }}
+      INTEG_TEST_REGION: ${{ secrets.INTEG_TEST_REGION }}
     uses: ./.github/workflows/integ-tests.yml
 
   release_new_version:
