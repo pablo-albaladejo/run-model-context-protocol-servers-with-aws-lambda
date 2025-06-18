@@ -1,0 +1,21 @@
+{
+  "name": "@demo/types",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Shared TypeScript types for MCP demo",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.34.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

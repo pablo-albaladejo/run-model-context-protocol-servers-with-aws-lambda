@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@mcp-demo/types": ["packages/types/src"],
+      "@mcp-demo/shared": ["packages/shared/src"],
+      "@mcp-demo/web": ["apps/web/src"],
+      "@mcp-demo/api": ["apps/api/src"]
+    },
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "apps/*/src/**/*",
+    "infrastructure/*/src/**/*"
+  ],
+  "exclude": ["node_modules", "dist", "build", ".next", "coverage"],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/shared" },
+    { "path": "./apps/web" },
+    { "path": "./apps/api" },
+    { "path": "./infrastructure/aws" }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@demo/time-mcp",
+  "version": "1.0.0",
+  "description": "Time MCP Server Lambda Function",
+  "main": "index.js",
+  "dependencies": {
+    "@demo/shared": "file:../../../../packages/shared",
+    "@demo/types": "file:../../../../packages/types"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^20.0.0"
+  }
+}

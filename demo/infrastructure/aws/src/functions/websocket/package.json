@@ -1,0 +1,18 @@
+{
+  "name": "@demo/websocket-handler",
+  "version": "1.0.0",
+  "description": "WebSocket handler for MCP Demo",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.0.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-lambda": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "@demo/shared": "file:../../../../packages/shared",
+    "@demo/types": "file:../../../../packages/types"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^20.0.0"
+  }
+}

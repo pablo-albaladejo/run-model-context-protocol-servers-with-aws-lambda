@@ -1,0 +1,138 @@
+name: Deploy MCP Demo
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm install -g npm@10
+      - run: npm ci
+      - run: npm run lint --workspaces
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test --workspaces --if-present
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build --workspaces
+
+  deploy-infra:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - run: npm ci
+      - run: npm run build --workspaces
+      - name: Deploy CDK
+        run: |
+          cd demo/infrastructure/aws
+          npm ci
+          npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+      - name: Save CDK Outputs
+        id: cdk_outputs
+        run: |
+          cd demo/infrastructure/aws
+          echo "CDK_OUTPUTS<<EOF" >> $GITHUB_ENV
+          cat cdk-outputs.json >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Export API URL and S3 Bucket
+        id: extract_outputs
+        run: |
+          cd demo/infrastructure/aws
+          API_URL=$(jq -r '.[].ApiUrl' cdk-outputs.json)
+          WS_URL=$(jq -r '.[].WebSocketUrl' cdk-outputs.json)
+          BUCKET=$(jq -r '.[].WebAppBucket' cdk-outputs.json)
+          USER_POOL_ID=$(jq -r '.[].UserPoolId' cdk-outputs.json)
+          USER_POOL_CLIENT_ID=$(jq -r '.[].UserPoolClientId' cdk-outputs.json)
+          IDENTITY_POOL_ID=$(jq -r '.[].IdentityPoolId' cdk-outputs.json)
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "ws_url=$WS_URL" >> $GITHUB_OUTPUT
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "user_pool_id=$USER_POOL_ID" >> $GITHUB_OUTPUT
+          echo "user_pool_client_id=$USER_POOL_CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "identity_pool_id=$IDENTITY_POOL_ID" >> $GITHUB_OUTPUT
+      - name: Create Demo User
+        run: |
+          cd demo/infrastructure/aws
+          USER_POOL_ID=$(jq -r '.[].UserPoolId' cdk-outputs.json)
+          aws lambda invoke \
+            --function-name MCPDemoStack-create-demo-user \
+            --payload '{}' \
+            response.json
+          echo "Demo user creation response:"
+          cat response.json
+    outputs:
+      api_url: ${{ steps.extract_outputs.outputs.api_url }}
+      ws_url: ${{ steps.extract_outputs.outputs.ws_url }}
+      bucket: ${{ steps.extract_outputs.outputs.bucket }}
+      user_pool_id: ${{ steps.extract_outputs.outputs.user_pool_id }}
+      user_pool_client_id: ${{ steps.extract_outputs.outputs.user_pool_client_id }}
+      identity_pool_id: ${{ steps.extract_outputs.outputs.identity_pool_id }}
+
+  build-and-deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: deploy-infra
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - run: npm ci
+      - name: Build frontend with API URL and Cognito config
+        run: |
+          cd demo/apps/web
+          echo "VITE_API_URL=${{ needs.deploy-infra.outputs.api_url }}" > .env
+          echo "VITE_WS_URL=${{ needs.deploy-infra.outputs.ws_url }}" >> .env
+          echo "VITE_AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+          echo "VITE_USER_POOL_ID=${{ needs.deploy-infra.outputs.user_pool_id }}" >> .env
+          echo "VITE_USER_POOL_CLIENT_ID=${{ needs.deploy-infra.outputs.user_pool_client_id }}" >> .env
+          echo "VITE_IDENTITY_POOL_ID=${{ needs.deploy-infra.outputs.identity_pool_id }}" >> .env
+          npm run build
+      - name: Sync to S3
+        run: |
+          aws s3 sync demo/apps/web/dist s3://${{ needs.deploy-infra.outputs.bucket }}/ --delete
+      - name: Invalidate CloudFront cache
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name MCPDemoStack | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="WebAppDistributionId") | .OutputValue')
+          if [ -n "$DISTRIBUTION_ID" ]; then
+            aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*'
+          fi
