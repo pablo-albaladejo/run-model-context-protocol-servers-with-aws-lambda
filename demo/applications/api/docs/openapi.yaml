@@ -1,0 +1,752 @@
+openapi: 3.0.3
+info:
+  title: MCP Demo API
+  description: |
+    API for the Model Context Protocol (MCP) Demo application.
+
+    This API provides chat functionality with real-time messaging, user session management,
+    and integration with MCP servers for weather alerts and time services.
+
+    ## Authentication
+    All endpoints require JWT authentication via AWS Cognito.
+    Include the JWT token in the Authorization header: `Bearer <token>`
+
+    ## WebSocket Support
+    Real-time messaging is available via WebSocket connections at `/ws`
+
+    ## MCP Integration
+    The API integrates with MCP servers for:
+    - Weather alerts and forecasts
+    - Time and timezone information
+
+  version: 1.0.0
+  contact:
+    name: MCP Demo Team
+    email: pablo.albaladejo.mestre+mcp@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.mcp-demo.example.com
+    description: Production server
+  - url: https://api-staging.mcp-demo.example.com
+    description: Staging server
+  - url: http://localhost:3001
+    description: Local development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check the health status of the API
+      tags:
+        - Health
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-15T10:30:00Z"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  uptime:
+                    type: number
+                    example: 3600
+        "503":
+          description: API is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/chat/sessions:
+    post:
+      summary: Create chat session
+      description: Create a new chat session for the authenticated user
+      tags:
+        - Chat Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Optional session name
+                  example: "My Chat Session"
+      responses:
+        "201":
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/ChatSession"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: Get user sessions
+      description: Get all chat sessions for the authenticated user
+      tags:
+        - Chat Sessions
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of sessions to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of sessions to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatSession"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/chat/sessions/{sessionId}:
+    get:
+      summary: Get chat session
+      description: Get a specific chat session and its messages
+      tags:
+        - Chat Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID
+          schema:
+            type: string
+            example: "session-123"
+        - name: limit
+          in: query
+          description: Maximum number of messages to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of messages to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Session retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      session:
+                        $ref: "#/components/schemas/ChatSession"
+                      messages:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ChatMessage"
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Delete chat session
+      description: Delete a chat session and all its messages
+      tags:
+        - Chat Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID
+          schema:
+            type: string
+            example: "session-123"
+      responses:
+        "200":
+          description: Session deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Session deleted successfully"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/chat/messages:
+    post:
+      summary: Send message
+      description: Send a message in a chat session
+      tags:
+        - Chat Messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+                - sessionId
+              properties:
+                content:
+                  type: string
+                  description: Message content
+                  minLength: 1
+                  maxLength: 1000
+                  example: "What's the weather like today?"
+                sessionId:
+                  type: string
+                  description: Session ID
+                  example: "session-123"
+                metadata:
+                  type: object
+                  description: Optional metadata
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        $ref: "#/components/schemas/ChatMessage"
+                      session:
+                        $ref: "#/components/schemas/ChatSession"
+                      mcpResponse:
+                        $ref: "#/components/schemas/MCPResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/admin/metrics:
+    get:
+      summary: Get system metrics
+      description: Get system-wide metrics (admin only)
+      tags:
+        - Admin
+      parameters:
+        - name: period
+          in: query
+          description: Time period for metrics
+          required: false
+          schema:
+            type: string
+            enum: [1h, 24h, 7d, 30d]
+            default: "24h"
+      responses:
+        "200":
+          description: Metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/SystemMetrics"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/admin/sessions:
+    get:
+      summary: Get all sessions
+      description: Get all active sessions (admin only)
+      tags:
+        - Admin
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of sessions to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of sessions to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: status
+          in: query
+          description: Filter by session status
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, all]
+            default: "active"
+      responses:
+        "200":
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdminSession"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ws:
+    get:
+      summary: WebSocket connection
+      description: |
+        Establish a WebSocket connection for real-time messaging.
+
+        ## Connection
+        Connect to the WebSocket endpoint with the JWT token as a query parameter:
+        `ws://localhost:3001/ws?token=<jwt_token>`
+
+        ## Message Format
+        All messages are JSON objects with a `type` field:
+
+        ### Send Message
+        ```json
+        {
+          "type": "send_message",
+          "data": {
+            "content": "Hello, world!",
+            "sessionId": "session-123"
+          }
+        }
+        ```
+
+        ### Receive Message
+        ```json
+        {
+          "type": "message_received",
+          "data": {
+            "id": "msg-456",
+            "content": "Hello there!",
+            "sender": "assistant",
+            "timestamp": "2024-01-15T10:30:00Z"
+          }
+        }
+        ```
+
+        ### Error Message
+        ```json
+        {
+          "type": "error",
+          "data": {
+            "code": "VALIDATION_ERROR",
+            "message": "Invalid message format"
+          }
+        }
+        ```
+      tags:
+        - WebSocket
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: JWT authentication token
+          schema:
+            type: string
+      responses:
+        "101":
+          description: Switching to WebSocket protocol
+        "401":
+          description: Unauthorized - Invalid or missing token
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from AWS Cognito
+
+  schemas:
+    ChatSession:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "session-123"
+        name:
+          type: string
+          example: "My Chat Session"
+        userId:
+          type: string
+          example: "user-456"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        lastActivityAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T11:45:00Z"
+        messageCount:
+          type: integer
+          example: 25
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "active"
+      required:
+        - id
+        - userId
+        - createdAt
+        - lastActivityAt
+        - messageCount
+        - status
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "msg-789"
+        sessionId:
+          type: string
+          example: "session-123"
+        content:
+          type: string
+          example: "What's the weather like today?"
+        sender:
+          type: string
+          enum: [user, assistant]
+          example: "user"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        metadata:
+          type: object
+          additionalProperties: true
+          example:
+            mcpServer: "weather-alerts"
+            responseTime: 150
+      required:
+        - id
+        - sessionId
+        - content
+        - sender
+        - timestamp
+
+    MCPResponse:
+      type: object
+      properties:
+        server:
+          type: string
+          example: "weather-alerts"
+        tool:
+          type: string
+          example: "get_weather"
+        response:
+          type: string
+          example: "The weather is sunny with a temperature of 25°C"
+        duration:
+          type: number
+          example: 150
+        success:
+          type: boolean
+          example: true
+      required:
+        - server
+        - response
+        - success
+
+    SystemMetrics:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          example: 150
+        activeSessions:
+          type: integer
+          example: 45
+        totalMessages:
+          type: integer
+          example: 1250
+        averageResponseTime:
+          type: number
+          example: 245.5
+        mcpServerCalls:
+          type: object
+          properties:
+            weatherAlerts:
+              type: integer
+              example: 89
+            timeService:
+              type: integer
+              example: 67
+        errorRate:
+          type: number
+          example: 0.02
+        uptime:
+          type: number
+          example: 86400
+      required:
+        - totalUsers
+        - activeSessions
+        - totalMessages
+        - averageResponseTime
+
+    AdminSession:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "session-123"
+        userId:
+          type: string
+          example: "user-456"
+        username:
+          type: string
+          example: "demo_user"
+        email:
+          type: string
+          example: "demo@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        lastActivityAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T11:45:00Z"
+        messageCount:
+          type: integer
+          example: 25
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "active"
+        ipAddress:
+          type: string
+          example: "192.168.1.100"
+        userAgent:
+          type: string
+          example: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+      required:
+        - id
+        - userId
+        - createdAt
+        - lastActivityAt
+        - messageCount
+        - status
+
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          example: 20
+        offset:
+          type: integer
+          example: 0
+        total:
+          type: integer
+          example: 150
+        hasMore:
+          type: boolean
+          example: true
+      required:
+        - limit
+        - offset
+        - total
+        - hasMore
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Invalid request parameters"
+        details:
+          type: object
+          additionalProperties: true
+          example:
+            field: "content"
+            reason: "Required field is missing"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        correlationId:
+          type: string
+          example: "corr-123"
+      required:
+        - success
+        - error
+        - message
+        - timestamp
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Chat Sessions
+    description: Chat session management
+  - name: Chat Messages
+    description: Message handling
+  - name: Admin
+    description: Administrative endpoints (admin only)
+  - name: WebSocket
+    description: Real-time messaging
+
+externalDocs:
+  description: MCP Protocol Documentation
+  url: https://modelcontextprotocol.io/

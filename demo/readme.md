@@ -1,287 +1,388 @@
-# MCP Demo - Model Context Protocol with AWS Lambda
+# MCP Demo Application
 
-A full-stack demonstration of the Model Context Protocol (MCP) using AWS Lambda, featuring a React web application with real-time chat capabilities and an admin dashboard.
-
-## 🏗️ Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React App     │    │   API Gateway   │    │   Lambda        │
-│   (Frontend)    │◄──►│   (REST/WS)     │◄──►│   Functions     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Cognito       │    │   DynamoDB      │    │   MCP Servers   │
-│   (Auth)        │    │   (Storage)     │    │   (Weather/Time)│
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-### Components
-
-- **Frontend**: React app with Vite, Tailwind CSS, and AWS Amplify UI
-- **Backend**: Express.js API with WebSocket support
-- **Authentication**: AWS Cognito with auto-created admin user
-- **Database**: DynamoDB for chat messages and user sessions
-- **MCP Servers**: Lambda functions for weather alerts and time services
-- **Admin Dashboard**: Real-time monitoring and analytics
+A comprehensive demonstration of Model Context Protocol (MCP) servers running on AWS Lambda, featuring a modern web application with real-time chat capabilities, MCP server integration, and enterprise-grade security and performance features.
 
 ## 🚀 Features
 
-### Chat Interface
+### Core Functionality
 
-- Real-time messaging with WebSocket support
-- Integration with MCP servers (weather alerts, time)
-- Message history persistence
-- User session management
+- **Real-time Chat**: WebSocket-based chat application with message history
+- **MCP Server Integration**: Connect to external MCP servers for enhanced functionality
+- **User Management**: AWS Cognito integration for authentication and authorization
+- **Session Management**: Persistent chat sessions with DynamoDB storage
 
-### Admin Dashboard
+### Security Features
 
-- **System Overview**: Real-time metrics and health status
-- **User Analytics**: Active sessions, message counts, response times
-- **Database Monitoring**: Connection status and performance
-- **Request Analytics**: Weather and time service usage
-- **Session Management**: View active user sessions
+- **Rate Limiting**: Multi-tier rate limiting (auth, API, chat, user, IP-based)
+- **Input Validation**: Comprehensive validation with sanitization and custom rules
+- **Security Headers**: Complete security header implementation (CSP, HSTS, XSS protection)
+- **Authentication**: JWT token validation with AWS Cognito
+- **Data Protection**: Encryption at rest and in transit
+- **Audit Logging**: Comprehensive security event logging
 
-### Authentication
+### Performance Features
 
-- AWS Cognito integration
-- Two separate user roles:
-  - **`demo_user`**: Chat functionality only (no admin access)
-  - **`demo_admin`**: Admin dashboard only (no chat access)
-- Both users share the same email: `pablo.albaladejo.mestre+mcp@gmail.com`
-- Auto-created during deployment with passwords emailed
-- Protected routes with role-based access control
+- **Caching Strategy**: Multi-layer caching (application, CDN, database)
+- **Connection Pooling**: Optimized database connections
+- **Lambda Optimization**: Cold start reduction and memory optimization
+- **Monitoring**: Real-time performance metrics and alerting
+
+### Observability
+
+- **CloudWatch Dashboards**: Comprehensive monitoring dashboards
+- **Alerting System**: Multi-level alerts (critical, warning, informational)
+- **Structured Logging**: JSON logging with correlation IDs
+- **Custom Metrics**: Application-specific performance metrics
+- **Tracing**: Distributed tracing with AWS X-Ray
+
+## 🏗️ Architecture
+
+The application follows a hexagonal architecture pattern with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Web Application                          │
+├─────────────────────────────────────────────────────────────┤
+│  React + TypeScript + Vite + Tailwind CSS                  │
+│  Real-time WebSocket communication                         │
+│  Responsive design with modern UI/UX                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   API Gateway                              │
+│  HTTPS endpoints with rate limiting                        │
+│  WebSocket API for real-time communication                 │
+│  Security headers and CORS configuration                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                Lambda Functions                            │
+│  ├─ Authentication & Authorization                        │
+│  ├─ Chat Message Processing                               │
+│  ├─ MCP Server Integration                                │
+│  ├─ Session Management                                    │
+│  └─ Admin Operations                                      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                AWS Services                                │
+│  ├─ DynamoDB (Data Storage)                               │
+│  ├─ Cognito (User Management)                             │
+│  ├─ CloudWatch (Monitoring)                               │
+│  ├─ SNS (Notifications)                                   │
+│  └─ CloudFront (CDN)                                      │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ## 📁 Project Structure
 
 ```
 demo/
-├── apps/
-│   ├── api/                 # Express.js API backend
+├── applications/
+│   ├── api/                    # Backend API application
 │   │   ├── src/
-│   │   │   ├── controllers/
-│   │   │   │   ├── chat.controller.ts
-│   │   │   │   ├── websocket.controller.ts
-│   │   │   │   └── admin.controller.ts      # Admin endpoints
-│   │   │   ├── middleware/
-│   │   │   │   └── auth.middleware.ts       # Cognito auth
-│   │   │   └── index.ts
-│   │   └── package.json
-│   └── web/                 # React frontend
+│   │   │   ├── adapters/       # Lambda handlers
+│   │   │   ├── application/    # Use cases and business logic
+│   │   │   ├── controllers/    # HTTP controllers
+│   │   │   ├── domain/         # Domain entities and repositories
+│   │   │   ├── infrastructure/ # AWS services and middleware
+│   │   │   │   ├── middleware/ # Security, validation, logging
+│   │   │   │   ├── services/   # Cache, metrics, external services
+│   │   │   │   └── repositories/ # Data access layer
+│   │   │   └── shared/         # Shared schemas and utilities
+│   │   └── tests/              # Unit and integration tests
+│   └── web/                    # Frontend React application
 │       ├── src/
-│       │   ├── components/
-│       │   │   ├── ChatApp.tsx
-│       │   │   ├── AdminDashboard.tsx       # Admin interface
-│       │   │   ├── Header.tsx
-│       │   │   └── Login.tsx
-│       │   ├── hooks/
-│       │   │   └── useWebSocket.ts
-│       │   ├── utils/
-│       │   │   └── cn.ts
-│       │   └── App.tsx
-│       └── package.json
+│       │   ├── components/     # React components
+│       │   ├── hooks/          # Custom React hooks
+│       │   └── utils/          # Utility functions
+│       └── tests/              # Frontend tests
 ├── infrastructure/
-│   └── aws/                 # CDK infrastructure
+│   └── aws/                    # CDK infrastructure code
 │       ├── src/
-│       │   ├── stacks/
-│       │   │   └── mcp-demo-stack.ts
-│       │   └── functions/
-│       │       ├── weather-alerts/
-│       │       ├── time/
-│       │       ├── websocket/
-│       │       └── create-demo-user/
-│       └── package.json
-├── packages/
-│   ├── shared/              # Shared utilities
-│   └── types/               # TypeScript types
-└── .github/
-    └── workflows/
-        └── deploy.yml       # CI/CD pipeline
+│       │   ├── alerts/         # CloudWatch alerts
+│       │   ├── dashboards/     # Monitoring dashboards
+│       │   ├── functions/      # Lambda function definitions
+│       │   └── stacks/         # CDK stacks
+│       └── tests/              # Infrastructure tests
+├── docs/                       # Documentation
+│   ├── architecture-diagrams.md
+│   ├── development-guide.md
+│   ├── monitoring-guide.md
+│   ├── security-performance-guide.md
+│   └── testing-guide.md
+└── packages/
+    └── shared/                 # Shared utilities and types
 ```
 
-## 🛠️ Setup & Deployment
+## 🛠️ Technology Stack
+
+### Frontend
+
+- **React 18** with TypeScript
+- **Vite** for build tooling
+- **Tailwind CSS** for styling
+- **Vitest** for testing
+- **WebSocket** for real-time communication
+
+### Backend
+
+- **Node.js** with TypeScript
+- **AWS Lambda** for serverless functions
+- **Express.js** for API framework
+- **AWS SDK v3** for AWS services
+- **Jest** for testing
+
+### Infrastructure
+
+- **AWS CDK** for infrastructure as code
+- **TypeScript** for CDK definitions
+- **CloudWatch** for monitoring and alerting
+- **DynamoDB** for data storage
+- **Cognito** for user management
+
+### Security & Performance
+
+- **Rate Limiting** with configurable rules
+- **Input Validation** with sanitization
+- **Security Headers** (CSP, HSTS, XSS protection)
+- **Caching** with multiple backends
+- **Structured Logging** with correlation IDs
+- **Custom Metrics** for monitoring
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18+ and npm
 - AWS CLI configured
 - AWS CDK installed globally
+- Docker (for local development)
 
-### 1. Install Dependencies
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd demo
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   cp env.example .env
+   # Edit .env with your AWS configuration
+   ```
+
+4. **Deploy infrastructure**
+
+   ```bash
+   cd infrastructure/aws
+   npm run deploy
+   ```
+
+5. **Start development servers**
+
+   ```bash
+   # Start backend
+   npm run dev:api
+
+   # Start frontend (in another terminal)
+   npm run dev:web
+   ```
+
+### Development
 
 ```bash
-cd demo
-npm install
-```
+# Run all tests
+npm test
 
-### 2. Configure AWS
+# Run tests with coverage
+npm run test:coverage
 
-```bash
-aws configure
-```
+# Run linting
+npm run lint
 
-### 3. Bootstrap CDK (first time only)
+# Run type checking
+npm run type-check
 
-```bash
-cd infrastructure/aws
-npm install
-npx cdk bootstrap
-```
-
-### 4. Deploy Infrastructure
-
-```bash
-# Deploy all stacks
-npm run deploy
-
-# Or deploy specific environment
-./deploy-env.sh dev
-```
-
-### 5. Deploy Applications
-
-```bash
-# Build and deploy API
-cd apps/api
+# Build for production
 npm run build
-
-# Build and deploy frontend
-cd apps/web
-npm run build
 ```
 
-## 🔧 Development
+## 📚 Documentation
 
-### Local Development
+### Architecture & Design
 
-```bash
-# Start API server
-cd apps/api
-npm run dev
+- [Architecture Diagrams](docs/architecture-diagrams.md) - System architecture and data flow
+- [Development Guide](docs/development-guide.md) - Setup, development workflow, and debugging
 
-# Start frontend
-cd apps/web
-npm run dev
-```
+### Security & Performance
 
-### Environment Variables
+- [Security & Performance Guide](docs/security-performance-guide.md) - Security measures and performance optimizations
+- [Monitoring Guide](docs/monitoring-guide.md) - Observability, dashboards, and alerting
 
-Create `.env` files in each app directory:
+### Testing & Quality
 
-**Frontend** (`apps/web/.env`):
+- [Testing Guide](docs/testing-guide.md) - Testing strategy, coverage, and best practices
 
-```env
-VITE_API_URL=http://localhost:3001
-VITE_WEBSOCKET_URL=ws://localhost:3001
-VITE_USER_POOL_ID=your-user-pool-id
-VITE_CLIENT_ID=your-client-id
-VITE_IDENTITY_POOL_ID=your-identity-pool-id
-```
+### Infrastructure
 
-**API** (`apps/api/.env`):
+- [AWS Infrastructure README](infrastructure/aws/README.md) - Infrastructure setup and deployment
 
-```env
-PORT=3001
-CHAT_TABLE_NAME=your-chat-table
-SESSIONS_TABLE_NAME=your-sessions-table
-USER_POOL_ID=your-user-pool-id
-CLIENT_ID=your-client-id
-```
+## 🔒 Security Features
 
-## 📊 Admin Dashboard
+### Rate Limiting
 
-The admin dashboard provides comprehensive monitoring of the MCP system:
+- **Authentication endpoints**: 5 attempts per 15 minutes
+- **API endpoints**: 100 requests per 15 minutes
+- **Chat messages**: 30 messages per minute
+- **Per-user limits**: 1000 requests per 15 minutes
+- **IP-based limits**: 500 requests per 15 minutes
 
-### Overview Tab
+### Input Validation
 
-- **System Status**: Real-time health indicators
-- **Key Metrics**: Total users, active sessions, messages, response times
-- **Today's Activity**: Message counts and service usage
-- **System Health**: Database, API, and WebSocket status
+- **Comprehensive validation** for all inputs
+- **Sanitization** to prevent injection attacks
+- **Custom validation rules** for business logic
+- **Type checking** and format validation
 
-### Sessions Tab
+### Security Headers
 
-- **Active Sessions**: List of current user sessions
-- **Session Details**: Creation time, last activity, message count
-- **Real-time Updates**: Auto-refresh every 30 seconds
+- **Content Security Policy** (CSP) to prevent XSS
+- **HTTP Strict Transport Security** (HSTS) for HTTPS enforcement
+- **X-XSS-Protection** for additional XSS protection
+- **X-Frame-Options** to prevent clickjacking
+- **Referrer Policy** for privacy protection
 
-### Analytics Tab
+### Authentication & Authorization
 
-- **Coming Soon**: Advanced analytics and reporting
-- **Usage Patterns**: User behavior analysis
-- **Performance Metrics**: Detailed performance monitoring
+- **AWS Cognito** integration for user management
+- **JWT token validation** with proper expiration
+- **Role-based access control** (RBAC)
+- **Session management** with secure invalidation
 
-### Access Control
+## ⚡ Performance Features
 
-- **Authentication Required**: All routes protected by Cognito
-- **Role-Based Access**:
-  - `demo_user`: Can only access chat functionality
-  - `demo_admin`: Can only access admin dashboard
-- **Route Protection**: Automatic redirection based on user role
-- **Secure Endpoints**: JWT token verification for all requests
+### Caching Strategy
 
-## 🔐 Security
+- **Multi-layer caching**: Application, CDN, and database
+- **Cache patterns**: Cache-aside, write-through, and invalidation
+- **TTL management** with environment-specific configurations
+- **Cache statistics** and monitoring
 
-- **Cognito Authentication**: JWT-based user authentication
-- **API Gateway Authorization**: Cognito authorizer for REST endpoints
-- **Admin Route Protection**: Middleware-based access control
-- **Environment Variables**: Secure configuration management
-- **HTTPS Only**: All production traffic encrypted
+### Database Optimization
 
-## 🚀 CI/CD Pipeline
+- **Connection pooling** for DynamoDB
+- **Query optimization** with proper indexes
+- **Batch operations** for improved throughput
+- **Read replicas** for read-heavy workloads
 
-The GitHub Actions pipeline automatically:
+### Lambda Optimization
 
-1. **Lint & Test**: Code quality checks
-2. **Build**: Compile TypeScript and build applications
-3. **Deploy Infrastructure**: CDK deployment to AWS
-4. **Deploy Frontend**: S3 and CloudFront deployment
-5. **Create Users**: Auto-create both `demo_user` and `demo_admin`
-6. **Update Environment**: Inject API URLs into frontend
+- **Cold start reduction** with connection reuse
+- **Memory optimization** based on workload
+- **Concurrent execution** limits
+- **Performance monitoring** and alerting
 
-## 📈 Monitoring & Analytics
+## 📊 Monitoring & Observability
 
-### Real-time Metrics
+### CloudWatch Dashboards
 
-- User session tracking
-- Message volume monitoring
-- Response time analysis
-- Service usage statistics
+- **API Gateway metrics**: Request count, latency, errors
+- **Lambda metrics**: Duration, memory usage, errors
+- **DynamoDB metrics**: Read/write capacity, throttling
+- **WebSocket metrics**: Connection count, message rate
+- **Custom application metrics**: User activity, cache performance
 
-### Database Monitoring
+### Alerting System
 
-- DynamoDB connection status
-- Table performance metrics
-- Query optimization insights
+- **Critical alerts**: Service failures, high error rates
+- **Warning alerts**: Performance degradation, capacity issues
+- **Informational alerts**: Usage patterns, security events
+- **SNS integration** for notifications
 
-### System Health
+### Structured Logging
 
-- Lambda function status
-- API Gateway performance
-- WebSocket connection monitoring
+- **JSON logging** with correlation IDs
+- **Log levels** and filtering
+- **Performance metrics** in logs
+- **Security event logging**
+
+## 🧪 Testing
+
+### Test Coverage
+
+- **Unit tests**: 90%+ coverage for business logic
+- **Integration tests**: API endpoints and database operations
+- **Frontend tests**: Component testing with React Testing Library
+- **Infrastructure tests**: CDK stack validation
+
+### Test Types
+
+- **Unit tests**: Individual functions and classes
+- **Integration tests**: API endpoints and external services
+- **E2E tests**: Complete user workflows
+- **Performance tests**: Load testing and benchmarking
+
+## 🚀 Deployment
+
+### Environments
+
+- **Development**: Local development with hot reloading
+- **Staging**: Pre-production testing environment
+- **Production**: Live application with full monitoring
+
+### CI/CD Pipeline
+
+- **Automated testing** on every commit
+- **Security scanning** for vulnerabilities
+- **Infrastructure validation** before deployment
+- **Blue-green deployments** for zero downtime
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow the established code style and patterns
+- Write tests for new features
+- Update documentation as needed
+- Ensure security and performance considerations
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-For issues and questions:
+- AWS Lambda team for serverless computing
+- Model Context Protocol community
+- Open source contributors and maintainers
 
-- Check the [documentation](../README.md)
-- Review [examples](../examples/)
-- Open an issue on GitHub
+## 📞 Support
+
+For support and questions:
+
+- Create an issue in the repository
+- Check the documentation in the `docs/` folder
+- Review the troubleshooting guides
 
 ---
 
-**Built with ❤️ using AWS CDK, React, and the Model Context Protocol**
+**Note**: This is a demonstration application. For production use, ensure all security measures are properly configured and tested.
