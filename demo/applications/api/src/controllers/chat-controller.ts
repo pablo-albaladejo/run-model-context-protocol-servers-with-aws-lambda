@@ -13,18 +13,25 @@ import { SendMessageUseCase } from "../application/use-cases/chat/send-message-u
 import { ChatMessageRepository } from "../domain/repositories/chat-message-repository";
 import { MCPService } from "../domain/services/mcp-service";
 import { SessionService } from "../domain/services/session-service";
-import { container } from "../infrastructure/container";
+import { container, TYPES } from "../infrastructure/container";
 import {
   logger,
   metrics,
   MetricUnit,
 } from "../infrastructure/middleware/powertools-middleware";
+import { ValidationSchemas } from "../infrastructure/middleware/validation-middleware";
 import { authenticateChatUser } from "../middleware/chat-auth-middleware";
 
 const router = Router();
 const dynamoClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 const lambdaClient = new LambdaClient({});
+
+// Get services from container
+const cacheService = container.get(TYPES.CacheService);
+const metricsService = container.get(TYPES.MetricsService);
+const validationMiddleware = container.get(TYPES.ValidationMiddleware);
+const rateLimitMiddleware = container.get(TYPES.RateLimitMiddleware);
 
 const CHAT_TABLE_NAME =
   process.env["CHAT_TABLE_NAME"] || "MCPDemoStack-dev-chat-messages";
@@ -71,86 +78,162 @@ interface MCPResponse {
 // Apply chat authentication middleware to all chat routes
 router.use(authenticateChatUser);
 
+// Apply rate limiting to chat endpoints
+router.use(rateLimitMiddleware.middleware());
+
 // Create a new chat session
-router.post("/sessions", async (req: Request, res: Response) => {
-  try {
-    const sessionId = uuidv4();
-    const now = new Date().toISOString();
-    const ttl = Math.floor(Date.now() / 1000) + 24 * 60 * 60; // 24 hours
+router.post(
+  "/sessions",
+  validationMiddleware.validate(ValidationSchemas.createSession),
+  async (req: Request, res: Response) => {
+    try {
+      const startTime = Date.now();
+      const sessionId = uuidv4();
+      const now = new Date().toISOString();
+      const ttl = Math.floor(Date.now() / 1000) + 24 * 60 * 60; // 24 hours
 
-    const session: Session = {
-      sessionId,
-      createdAt: now,
-      lastActivity: now,
-      ttl,
-    };
+      const session: Session = {
+        sessionId,
+        createdAt: now,
+        lastActivity: now,
+        ttl,
+      };
 
-    await docClient.send(
-      new PutCommand({
-        TableName: SESSIONS_TABLE_NAME,
-        Item: session,
-      })
-    );
+      await docClient.send(
+        new PutCommand({
+          TableName: SESSIONS_TABLE_NAME,
+          Item: session,
+        })
+      );
 
-    logger.info("New session created", {
-      sessionId,
-      userId: req.user.sub,
-      correlationId: logger.getCorrelationId(),
-    });
-    metrics.addMetric("SessionsCreated", MetricUnit.Count, 1);
+      // Cache session data
+      await cacheService.set(`session:${sessionId}`, session, 1800); // 30 minutes
 
-    res.status(201).json({
-      sessionId,
-      createdAt: now,
-      message: "Session created successfully",
-    });
-  } catch (error) {
-    logger.error("Error creating session", {
-      error: error instanceof Error ? error.message : String(error),
-      userId: req.user.sub,
-      correlationId: logger.getCorrelationId(),
-    });
-    metrics.addMetric("DatabaseErrors", MetricUnit.Count, 1);
+      const duration = Date.now() - startTime;
 
-    res.status(500).json({
-      error: "Failed to create session",
-      message: "Internal server error",
-    });
+      logger.info("New session created", {
+        sessionId,
+        userId: req.user.sub,
+        correlationId: logger.getCorrelationId(),
+        duration,
+      });
+
+      // Record metrics
+      await metricsService.recordMetric("SessionCreated", 1, "Count");
+      await metricsService.recordMetric(
+        "SessionCreationTime",
+        duration,
+        "Milliseconds"
+      );
+      await metricsService.recordUserActivity(
+        req.user.sub,
+        "session_created",
+        duration
+      );
+
+      metrics.addMetric("SessionsCreated", MetricUnit.Count, 1);
+
+      res.status(201).json({
+        sessionId,
+        createdAt: now,
+        message: "Session created successfully",
+      });
+    } catch (error) {
+      const duration = Date.now() - (req as any).startTime || 0;
+
+      logger.error("Error creating session", {
+        error: error instanceof Error ? error.message : String(error),
+        userId: req.user.sub,
+        correlationId: logger.getCorrelationId(),
+        duration,
+      });
+
+      await metricsService.recordError(
+        "SESSION_CREATION_ERROR",
+        "500",
+        "chat_controller",
+        req.user.sub
+      );
+      metrics.addMetric("DatabaseErrors", MetricUnit.Count, 1);
+
+      res.status(500).json({
+        error: "Failed to create session",
+        message: "Internal server error",
+      });
+    }
   }
-});
+);
 
 // Get session information
 router.get("/sessions/:sessionId", async (req: Request, res: Response) => {
   try {
+    const startTime = Date.now();
     const { sessionId } = req.params;
 
-    const result = await docClient.send(
-      new GetCommand({
-        TableName: SESSIONS_TABLE_NAME,
-        Key: { sessionId },
-      })
-    );
+    // Try to get from cache first
+    let session = await cacheService.get<Session>(`session:${sessionId}`);
 
-    if (!result.Item) {
-      return res.status(404).json({
-        error: "Session not found",
-        message: "The specified session does not exist",
-      });
+    if (!session) {
+      // Cache miss - get from database
+      const result = await docClient.send(
+        new GetCommand({
+          TableName: SESSIONS_TABLE_NAME,
+          Key: { sessionId },
+        })
+      );
+
+      if (!result.Item) {
+        return res.status(404).json({
+          error: "Session not found",
+          message: "The specified session does not exist",
+        });
+      }
+
+      session = result.Item as Session;
+
+      // Cache the session
+      await cacheService.set(`session:${sessionId}`, session, 1800);
     }
 
-    const session = result.Item as Session;
+    const duration = Date.now() - startTime;
+
+    logger.info("Session retrieved", {
+      sessionId,
+      userId: req.user.sub,
+      correlationId: logger.getCorrelationId(),
+      duration,
+      cacheHit: !!session,
+    });
+
+    await metricsService.recordMetric("SessionRetrieved", 1, "Count");
+    await metricsService.recordMetric(
+      "SessionRetrievalTime",
+      duration,
+      "Milliseconds"
+    );
+
     return res.json({
       sessionId: session.sessionId,
       createdAt: session.createdAt,
       lastActivity: session.lastActivity,
     });
   } catch (error) {
+    const duration = Date.now() - (req as any).startTime || 0;
+
     logger.error("Error getting session", {
-      error,
+      error: error instanceof Error ? error.message : String(error),
       sessionId: req.params["sessionId"],
       userId: req.user.sub,
       correlationId: logger.getCorrelationId(),
+      duration,
     });
+
+    await metricsService.recordError(
+      "SESSION_RETRIEVAL_ERROR",
+      "500",
+      "chat_controller",
+      req.user.sub
+    );
     metrics.addMetric("DatabaseErrors", MetricUnit.Count, 1);
 
     return res.status(500).json({
@@ -161,111 +244,158 @@ router.get("/sessions/:sessionId", async (req: Request, res: Response) => {
 });
 
 // Send a message
-router.post("/messages", async (req: Request, res: Response) => {
-  try {
-    const { sessionId, message } = req.body;
+router.post(
+  "/messages",
+  validationMiddleware.validate(ValidationSchemas.chatMessage),
+  async (req: Request, res: Response) => {
+    try {
+      const startTime = Date.now();
+      const { sessionId, message } = req.body;
 
-    if (!sessionId || !message) {
-      return res.status(400).json({
-        error: "Missing required fields",
-        message: "sessionId and message are required",
-      });
-    }
+      // Verify session exists (try cache first)
+      let session = await cacheService.get<Session>(`session:${sessionId}`);
 
-    // Verify session exists
-    const sessionResult = await docClient.send(
-      new GetCommand({
-        TableName: SESSIONS_TABLE_NAME,
-        Key: { sessionId },
-      })
-    );
+      if (!session) {
+        const sessionResult = await docClient.send(
+          new GetCommand({
+            TableName: SESSIONS_TABLE_NAME,
+            Key: { sessionId },
+          })
+        );
 
-    if (!sessionResult.Item) {
-      return res.status(404).json({
-        error: "Session not found",
-        message: "The specified session does not exist",
-      });
-    }
+        if (!sessionResult.Item) {
+          return res.status(404).json({
+            error: "Session not found",
+            message: "The specified session does not exist",
+          });
+        }
 
-    // Save user message
-    const timestamp = new Date().toISOString();
-    const ttl = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
+        session = sessionResult.Item as Session;
+        await cacheService.set(`session:${sessionId}`, session, 1800);
+      }
 
-    const userMessage: ChatMessage = {
-      sessionId,
-      timestamp,
-      message,
-      sender: "user",
-      ttl,
-    };
+      // Save user message
+      const timestamp = new Date().toISOString();
+      const ttl = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
 
-    await docClient.send(
-      new PutCommand({
-        TableName: CHAT_TABLE_NAME,
-        Item: userMessage,
-      })
-    );
-
-    // Process message with MCP servers
-    const assistantMessage = await processWithMCPServers(message);
-
-    // Save assistant response
-    const assistantTimestamp = new Date().toISOString();
-    const assistantChatMessage: ChatMessage = {
-      sessionId,
-      timestamp: assistantTimestamp,
-      message: assistantMessage,
-      sender: "assistant",
-      ttl,
-    };
-
-    await docClient.send(
-      new PutCommand({
-        TableName: CHAT_TABLE_NAME,
-        Item: assistantChatMessage,
-      })
-    );
-
-    // Update session last activity
-    await docClient.send(
-      new PutCommand({
-        TableName: SESSIONS_TABLE_NAME,
-        Item: {
-          sessionId,
-          lastActivity: assistantTimestamp,
-          ttl: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-        },
-      })
-    );
-
-    return res.json({
-      sessionId,
-      userMessage: {
+      const userMessage: ChatMessage = {
+        sessionId,
         timestamp,
         message,
         sender: "user",
-      },
-      assistantMessage: {
-        timestamp: assistantTimestamp,
-        message: assistantMessage,
-        sender: "assistant",
-      },
-    });
-  } catch (error) {
-    logger.error("Error processing message", {
-      error,
-      sessionId: req.body.sessionId,
-      userId: req.user.sub,
-      correlationId: logger.getCorrelationId(),
-    });
-    metrics.addMetric("ValidationErrors", MetricUnit.Count, 1);
+        ttl,
+      };
 
-    return res.status(500).json({
-      error: "Failed to process message",
-      message: "Internal server error",
-    });
+      await docClient.send(
+        new PutCommand({
+          TableName: CHAT_TABLE_NAME,
+          Item: userMessage,
+        })
+      );
+
+      // Process message with MCP servers
+      const assistantResponse = await processWithMCPServers(message);
+
+      // Save assistant response
+      const assistantMessage: ChatMessage = {
+        sessionId,
+        timestamp: new Date().toISOString(),
+        message: assistantResponse,
+        sender: "assistant",
+        ttl,
+      };
+
+      await docClient.send(
+        new PutCommand({
+          TableName: CHAT_TABLE_NAME,
+          Item: assistantMessage,
+        })
+      );
+
+      // Update session last activity
+      const updatedSession = {
+        ...session,
+        lastActivity: new Date().toISOString(),
+      };
+
+      await docClient.send(
+        new PutCommand({
+          TableName: SESSIONS_TABLE_NAME,
+          Item: updatedSession,
+        })
+      );
+
+      // Update cache
+      await cacheService.set(`session:${sessionId}`, updatedSession, 1800);
+
+      // Invalidate message cache for this session
+      await cacheService.invalidate(`messages:${sessionId}:*`);
+
+      const duration = Date.now() - startTime;
+
+      logger.info("Message processed", {
+        sessionId,
+        userId: req.user.sub,
+        correlationId: logger.getCorrelationId(),
+        messageLength: message.length,
+        responseLength: assistantResponse.length,
+        duration,
+      });
+
+      // Record metrics
+      await metricsService.recordMetric("MessageProcessed", 1, "Count");
+      await metricsService.recordMetric(
+        "MessageProcessingTime",
+        duration,
+        "Milliseconds"
+      );
+      await metricsService.recordUserActivity(
+        req.user.sub,
+        "message_sent",
+        duration
+      );
+
+      metrics.addMetric("MessagesProcessed", MetricUnit.Count, 1);
+
+      res.json({
+        sessionId,
+        userMessage: {
+          timestamp,
+          message,
+          sender: "user",
+        },
+        assistantMessage: {
+          timestamp: assistantMessage.timestamp,
+          message: assistantResponse,
+          sender: "assistant",
+        },
+      });
+    } catch (error) {
+      const duration = Date.now() - (req as any).startTime || 0;
+
+      logger.error("Error processing message", {
+        error: error instanceof Error ? error.message : String(error),
+        sessionId: req.body.sessionId,
+        userId: req.user.sub,
+        correlationId: logger.getCorrelationId(),
+        duration,
+      });
+
+      await metricsService.recordError(
+        "MESSAGE_PROCESSING_ERROR",
+        "500",
+        "chat_controller",
+        req.user.sub
+      );
+      metrics.addMetric("MessageErrors", MetricUnit.Count, 1);
+
+      res.status(500).json({
+        error: "Failed to process message",
+        message: "Internal server error",
+      });
+    }
   }
-});
+);
 
 // Get chat history
 router.get("/messages/:sessionId", async (req: Request, res: Response) => {

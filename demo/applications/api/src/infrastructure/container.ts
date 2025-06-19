@@ -17,6 +17,19 @@ import { DynamoDBUserRepository } from "./repositories/DynamoDBUserRepository";
 import { AWSCPService } from "./services/AWSCPService";
 import { DynamoDBSessionService } from "./services/DynamoDBSessionService";
 
+// New security and performance services
+import {
+  RateLimitMiddleware,
+  createRateLimit,
+} from "./middleware/rate-limit-middleware";
+import {
+  SecurityHeadersMiddleware,
+  createSecurityHeadersForEnvironment,
+} from "./middleware/security-headers.middleware";
+import { ValidationMiddleware } from "./middleware/validation-middleware";
+import { CacheService, CacheServiceFactory } from "./services/cache-service";
+import { MetricsService } from "./services/metrics-service";
+
 // Types for dependency injection
 export const TYPES = {
   // Controllers
@@ -34,6 +47,13 @@ export const TYPES = {
   // Services
   MCPService: Symbol.for("MCPService"),
   SessionService: Symbol.for("SessionService"),
+  MetricsService: Symbol.for("MetricsService"),
+  CacheService: Symbol.for("CacheService"),
+
+  // Middleware
+  RateLimitMiddleware: Symbol.for("RateLimitMiddleware"),
+  ValidationMiddleware: Symbol.for("ValidationMiddleware"),
+  SecurityHeadersMiddleware: Symbol.for("SecurityHeadersMiddleware"),
 };
 
 export const container = new Container();
@@ -58,6 +78,65 @@ container
 container
   .bind<SessionService>(TYPES.SessionService)
   .to(DynamoDBSessionService)
+  .inSingletonScope();
+
+// Register new services
+container
+  .bind<MetricsService>(TYPES.MetricsService)
+  .to(MetricsService)
+  .inSingletonScope();
+
+container
+  .bind<CacheService>(TYPES.CacheService)
+  .toDynamicValue(() => {
+    const environment = process.env.NODE_ENV || "development";
+    return CacheServiceFactory.createForEnvironment(environment, {
+      ttl: parseInt(process.env.CACHE_TTL || "3600"),
+      prefix: process.env.CACHE_PREFIX || "mcp-demo",
+      namespace: "api",
+    });
+  })
+  .inSingletonScope();
+
+// Register middleware
+container
+  .bind<RateLimitMiddleware>(TYPES.RateLimitMiddleware)
+  .toDynamicValue(() => {
+    const environment = process.env.NODE_ENV || "development";
+    const rateLimitEnabled = process.env.RATE_LIMIT_ENABLED !== "false";
+
+    if (!rateLimitEnabled) {
+      // Return a no-op rate limiter for development
+      return createRateLimit({
+        windowMs: 15 * 60 * 1000,
+        maxRequests: 10000, // Very high limit
+        message: "Rate limiting disabled",
+      });
+    }
+
+    // Production rate limiting
+    return createRateLimit({
+      windowMs: 15 * 60 * 1000,
+      maxRequests: 100,
+      message: "Too many requests, please try again later.",
+    });
+  })
+  .inSingletonScope();
+
+container
+  .bind<ValidationMiddleware>(TYPES.ValidationMiddleware)
+  .to(ValidationMiddleware)
+  .inSingletonScope();
+
+container
+  .bind<SecurityHeadersMiddleware>(TYPES.SecurityHeadersMiddleware)
+  .toDynamicValue(() => {
+    const environment = (process.env.NODE_ENV || "development") as
+      | "development"
+      | "staging"
+      | "production";
+    return createSecurityHeadersForEnvironment(environment);
+  })
   .inSingletonScope();
 
 // Register use cases
